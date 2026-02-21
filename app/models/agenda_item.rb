@@ -1,6 +1,7 @@
 class AgendaItem < ApplicationRecord
   belongs_to :agenda_section
-  has_one :meeting, through: :agenda_section
+  has_one :agenda_version, through: :agenda_section
+  has_one :meeting, through: :agenda_version
 
   enum :item_type, {
     ordinance: "ordinance",

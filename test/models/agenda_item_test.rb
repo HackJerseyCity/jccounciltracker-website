@@ -37,7 +37,12 @@ class AgendaItemTest < ActiveSupport::TestCase
     assert_equal agenda_sections(:ordinance_first_reading), item.agenda_section
   end
 
-  test "has_one meeting through agenda_section" do
+  test "has_one agenda_version through agenda_section" do
+    item = agenda_items(:ordinance_with_details)
+    assert_equal agenda_versions(:regular_meeting_v1), item.agenda_version
+  end
+
+  test "has_one meeting through agenda_version" do
     item = agenda_items(:ordinance_with_details)
     assert_equal meetings(:regular_meeting), item.meeting
   end

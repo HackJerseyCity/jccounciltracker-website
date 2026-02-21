@@ -40,6 +40,12 @@ class Admin::MeetingsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "show with version param" do
+    sign_in_as(users(:content_admin))
+    get admin_meeting_path(meetings(:regular_meeting), version: 1)
+    assert_response :success
+  end
+
   # --- new ---
 
   test "new as content_admin" do
@@ -68,12 +74,13 @@ class Admin::MeetingsControllerTest < ActionDispatch::IntegrationTest
       StringIO.new(json_data), "application/json", false, original_filename: "test.json"
     )
 
-    assert_difference "Meeting.count", 1 do
+    assert_difference [ "Meeting.count", "AgendaVersion.count" ], 1 do
       post admin_meetings_path, params: { agenda_file: file }
     end
 
     meeting = Meeting.find_by(date: "2026-04-01", meeting_type: "special")
     assert_redirected_to admin_meeting_path(meeting)
+    assert_equal "Meeting agenda imported successfully.", flash[:notice]
     assert_equal 1, meeting.agenda_sections.count
     assert_equal 1, meeting.agenda_items.count
   end
@@ -88,13 +95,15 @@ class Admin::MeetingsControllerTest < ActionDispatch::IntegrationTest
     assert_response :unprocessable_entity
   end
 
-  test "create with duplicate meeting" do
+  test "create with duplicate meeting creates new version" do
     sign_in_as(users(:content_admin))
 
     json_data = {
       meeting: { type: "regular", date: "2026-02-25" },
-      agenda_pages: 9,
-      sections: []
+      agenda_pages: 12,
+      sections: [
+        { number: 1, title: "UPDATED SECTION", type: "regular_meeting", items: [] }
+      ]
     }.to_json
 
     file = Rack::Test::UploadedFile.new(
@@ -102,10 +111,14 @@ class Admin::MeetingsControllerTest < ActionDispatch::IntegrationTest
     )
 
     assert_no_difference "Meeting.count" do
-      post admin_meetings_path, params: { agenda_file: file }
+      assert_difference "AgendaVersion.count", 1 do
+        post admin_meetings_path, params: { agenda_file: file }
+      end
     end
 
-    assert_response :unprocessable_entity
+    meeting = meetings(:regular_meeting)
+    assert_redirected_to admin_meeting_path(meeting)
+    assert_match(/New version/, flash[:notice])
   end
 
   # --- destroy ---

@@ -1,9 +1,10 @@
 class AgendaImportService
-  attr_reader :meeting, :errors
+  attr_reader :meeting, :agenda_version, :errors
 
   def initialize(data)
     @data = data
     @meeting = nil
+    @agenda_version = nil
     @errors = []
   end
 
@@ -12,9 +13,15 @@ class AgendaImportService
     return self unless @errors.empty?
 
     ActiveRecord::Base.transaction do
-      @meeting = build_meeting
-      unless @meeting.save
+      find_or_create_meeting
+      unless @meeting.persisted? || @meeting.save
         @errors.concat(@meeting.errors.full_messages)
+        raise ActiveRecord::Rollback
+      end
+
+      build_agenda_version
+      unless @agenda_version.save
+        @errors.concat(@agenda_version.errors.full_messages)
         raise ActiveRecord::Rollback
       end
 
@@ -22,12 +29,19 @@ class AgendaImportService
       raise ActiveRecord::Rollback if @errors.any?
     end
 
-    @meeting = nil if @errors.any?
+    if @errors.any?
+      @meeting = nil
+      @agenda_version = nil
+    end
     self
   end
 
   def success?
     @errors.empty? && @meeting.present?
+  end
+
+  def new_version?
+    @agenda_version&.version_number.to_i > 1
   end
 
   private
@@ -38,18 +52,25 @@ class AgendaImportService
     end
   end
 
-  def build_meeting
+  def find_or_create_meeting
     meeting_data = @data["meeting"]
-    Meeting.new(
+    @meeting = Meeting.find_or_initialize_by(
       date: meeting_data["date"],
-      meeting_type: meeting_data["type"],
+      meeting_type: meeting_data["type"]
+    )
+  end
+
+  def build_agenda_version
+    next_version = (@meeting.agenda_versions.maximum(:version_number) || 0) + 1
+    @agenda_version = @meeting.agenda_versions.build(
+      version_number: next_version,
       agenda_pages: @data["agenda_pages"]
     )
   end
 
   def build_sections_and_items
     @data["sections"].each do |section_data|
-      section = @meeting.agenda_sections.build(
+      section = @agenda_version.agenda_sections.build(
         number: section_data["number"],
         title: section_data["title"],
         section_type: section_data["type"]

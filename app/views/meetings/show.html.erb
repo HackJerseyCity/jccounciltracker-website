@@ -11,23 +11,36 @@
     <% end %>
   </div>
 
+  <% if @meeting.agenda_versions.size > 1 %>
+    <div class="mt-4">
+      <%= form_with url: meeting_path(@meeting), method: :get, local: true, class: "flex items-center gap-3" do %>
+        <label for="version" class="text-sm font-medium text-gray-700">Agenda version:</label>
+        <select name="version" id="version" onchange="this.form.requestSubmit()" class="block rounded-md border-gray-300 shadow-sm text-sm focus:border-blue-500 focus:ring-blue-500">
+          <% @meeting.agenda_versions.each do |v| %>
+            <option value="<%= v.version_number %>" <%= "selected" if v == @agenda_version %>><%= v.display_label %></option>
+          <% end %>
+        </select>
+      <% end %>
+    </div>
+  <% end %>
+
   <div class="grid grid-cols-3 gap-4 mt-6 mb-10">
     <div class="bg-white rounded-lg border border-gray-200 p-4">
-      <p class="text-2xl font-bold text-gray-900"><%= @meeting.agenda_pages || "N/A" %></p>
+      <p class="text-2xl font-bold text-gray-900"><%= @agenda_version&.agenda_pages || "N/A" %></p>
       <p class="text-sm text-gray-500">Agenda pages</p>
     </div>
     <div class="bg-white rounded-lg border border-gray-200 p-4">
-      <p class="text-2xl font-bold text-gray-900"><%= @meeting.agenda_sections.size %></p>
+      <p class="text-2xl font-bold text-gray-900"><%= @agenda_sections.size %></p>
       <p class="text-sm text-gray-500">Sections</p>
     </div>
     <div class="bg-white rounded-lg border border-gray-200 p-4">
-      <p class="text-2xl font-bold text-gray-900"><%= @meeting.agenda_items.size %></p>
+      <p class="text-2xl font-bold text-gray-900"><%= @agenda_sections.sum { |s| s.agenda_items.size } %></p>
       <p class="text-sm text-gray-500">Agenda items</p>
     </div>
   </div>
 
   <div class="space-y-6">
-    <% @meeting.agenda_sections.each do |section| %>
+    <% @agenda_sections.each do |section| %>
       <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
         <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
           <h2 class="font-semibold text-gray-900"><%= section.number %>. <%= section.title %></h2>

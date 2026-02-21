@@ -1,11 +1,11 @@
 ordinance_first_reading:
-  meeting: regular_meeting
+  agenda_version: regular_meeting_v1
   number: 3
   title: "ORDINANCE - FIRST READING"
   section_type: ordinance_first_reading
 
 resolutions:
-  meeting: regular_meeting
+  agenda_version: regular_meeting_v1
   number: 10
   title: "RESOLUTIONS"
   section_type: resolutions

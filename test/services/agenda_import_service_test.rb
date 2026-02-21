@@ -57,19 +57,36 @@ class AgendaImportServiceTest < ActiveSupport::TestCase
     }
   end
 
-  test "successful import creates meeting, sections, and items" do
+  def existing_meeting_data
+    {
+      "meeting" => { "type" => "regular", "date" => "2026-02-25" },
+      "agenda_pages" => 12,
+      "sections" => [
+        {
+          "number" => 1,
+          "title" => "UPDATED SECTION",
+          "type" => "regular_meeting",
+          "items" => []
+        }
+      ]
+    }
+  end
+
+  test "successful import creates meeting, version, sections, and items" do
     service = AgendaImportService.new(valid_data)
 
-    assert_difference "Meeting.count", 1 do
+    assert_difference [ "Meeting.count", "AgendaVersion.count" ], 1 do
       service.call
     end
 
     assert service.success?
+    assert_not service.new_version?
     assert_equal "special", service.meeting.meeting_type
     assert_equal Date.new(2026, 3, 15), service.meeting.date
-    assert_equal 5, service.meeting.agenda_pages
-    assert_equal 3, service.meeting.agenda_sections.count
-    assert_equal 3, service.meeting.agenda_items.count
+    assert_equal 5, service.agenda_version.agenda_pages
+    assert_equal 1, service.agenda_version.version_number
+    assert_equal 3, service.agenda_version.agenda_sections.count
+    assert_equal 3, service.agenda_version.agenda_items.count
   end
 
   test "success? returns true on valid import" do
@@ -102,22 +119,33 @@ class AgendaImportServiceTest < ActiveSupport::TestCase
     assert service.errors.any?
   end
 
-  test "rolls back on failure" do
-    initial_meeting_count = Meeting.count
-    initial_section_count = AgendaSection.count
-    initial_item_count = AgendaItem.count
+  test "duplicate date+type creates new version" do
+    assert_no_difference "Meeting.count" do
+      assert_difference "AgendaVersion.count", 1 do
+        service = AgendaImportService.new(existing_meeting_data).call
 
-    data = valid_data
-    # Duplicate the existing fixture meeting to cause a uniqueness violation
-    data["meeting"]["date"] = "2026-02-25"
-    data["meeting"]["type"] = "regular"
+        assert service.success?
+        assert service.new_version?
+        assert_equal 2, service.agenda_version.version_number
+        assert_equal 12, service.agenda_version.agenda_pages
+        assert_equal meetings(:regular_meeting), service.meeting
+      end
+    end
+  end
+
+  test "rolls back version on section failure" do
+    initial_version_count = AgendaVersion.count
+    initial_section_count = AgendaSection.count
+
+    data = existing_meeting_data
+    # Add a section with missing required fields to cause failure
+    data["sections"] << { "number" => nil, "title" => nil, "type" => nil, "items" => [] }
 
     service = AgendaImportService.new(data).call
 
     assert_not service.success?
-    assert_equal initial_meeting_count, Meeting.count
+    assert_equal initial_version_count, AgendaVersion.count
     assert_equal initial_section_count, AgendaSection.count
-    assert_equal initial_item_count, AgendaItem.count
   end
 
   test "handles empty sections" do
@@ -128,15 +156,15 @@ class AgendaImportServiceTest < ActiveSupport::TestCase
 
     service = AgendaImportService.new(data).call
     assert service.success?
-    assert_equal 1, service.meeting.agenda_sections.count
-    assert_equal 0, service.meeting.agenda_items.count
+    assert_equal 1, service.agenda_version.agenda_sections.count
+    assert_equal 0, service.agenda_version.agenda_items.count
   end
 
   test "sets position correctly from array index" do
     service = AgendaImportService.new(valid_data).call
     assert service.success?
 
-    ordinance_section = service.meeting.agenda_sections.find_by(section_type: "ordinance_first_reading")
+    ordinance_section = service.agenda_version.agenda_sections.find_by(section_type: "ordinance_first_reading")
     items = ordinance_section.agenda_items.order(:position)
 
     assert_equal 0, items.first.position

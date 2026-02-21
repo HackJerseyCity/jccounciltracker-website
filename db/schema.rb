@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_21_153553) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_21_160449) do
   create_table "agenda_items", force: :cascade do |t|
     t.integer "agenda_section_id", null: false
     t.datetime "created_at", null: false
@@ -28,14 +28,24 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_21_153553) do
   end
 
   create_table "agenda_sections", force: :cascade do |t|
+    t.integer "agenda_version_id", null: false
     t.datetime "created_at", null: false
-    t.integer "meeting_id", null: false
     t.integer "number", null: false
     t.string "section_type", null: false
     t.string "title", null: false
     t.datetime "updated_at", null: false
-    t.index ["meeting_id", "number"], name: "index_agenda_sections_on_meeting_id_and_number", unique: true
-    t.index ["meeting_id"], name: "index_agenda_sections_on_meeting_id"
+    t.index ["agenda_version_id", "number"], name: "index_agenda_sections_on_agenda_version_id_and_number", unique: true
+    t.index ["agenda_version_id"], name: "index_agenda_sections_on_agenda_version_id"
+  end
+
+  create_table "agenda_versions", force: :cascade do |t|
+    t.integer "agenda_pages"
+    t.datetime "created_at", null: false
+    t.integer "meeting_id", null: false
+    t.datetime "updated_at", null: false
+    t.integer "version_number", default: 1, null: false
+    t.index ["meeting_id", "version_number"], name: "index_agenda_versions_on_meeting_id_and_version_number", unique: true
+    t.index ["meeting_id"], name: "index_agenda_versions_on_meeting_id"
   end
 
   create_table "invitations", force: :cascade do |t|
@@ -53,7 +63,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_21_153553) do
   end
 
   create_table "meetings", force: :cascade do |t|
-    t.integer "agenda_pages"
     t.datetime "created_at", null: false
     t.date "date", null: false
     t.string "meeting_type", null: false
@@ -82,7 +91,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_21_153553) do
   end
 
   add_foreign_key "agenda_items", "agenda_sections"
-  add_foreign_key "agenda_sections", "meetings"
+  add_foreign_key "agenda_sections", "agenda_versions"
+  add_foreign_key "agenda_versions", "meetings"
   add_foreign_key "invitations", "users", column: "accepted_by_id"
   add_foreign_key "invitations", "users", column: "invited_by_id"
   add_foreign_key "sessions", "users"

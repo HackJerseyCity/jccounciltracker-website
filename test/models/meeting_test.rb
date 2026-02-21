@@ -26,28 +26,57 @@ class MeetingTest < ActiveSupport::TestCase
     assert different_type.valid?
   end
 
-  test "has_many agenda_sections" do
+  test "has_many agenda_versions" do
+    meeting = meetings(:regular_meeting)
+    assert_includes meeting.agenda_versions, agenda_versions(:regular_meeting_v1)
+  end
+
+  test "current_version returns latest version" do
+    meeting = meetings(:regular_meeting)
+    assert_equal agenda_versions(:regular_meeting_v1), meeting.current_version
+  end
+
+  test "version finds specific version by number" do
+    meeting = meetings(:regular_meeting)
+    assert_equal agenda_versions(:regular_meeting_v1), meeting.version(1)
+    assert_nil meeting.version(99)
+  end
+
+  test "agenda_sections delegates through current_version" do
     meeting = meetings(:regular_meeting)
     assert_includes meeting.agenda_sections, agenda_sections(:ordinance_first_reading)
     assert_includes meeting.agenda_sections, agenda_sections(:resolutions)
   end
 
-  test "has_many agenda_items through agenda_sections" do
+  test "agenda_items delegates through current_version" do
     meeting = meetings(:regular_meeting)
     assert_includes meeting.agenda_items, agenda_items(:ordinance_with_details)
     assert_includes meeting.agenda_items, agenda_items(:resolution_item)
   end
 
-  test "cascade deletes agenda_sections and agenda_items" do
+  test "agenda_pages delegates through current_version" do
     meeting = meetings(:regular_meeting)
-    section_ids = meeting.agenda_section_ids
-    item_ids = meeting.agenda_item_ids
+    assert_equal 9, meeting.agenda_pages
+  end
 
+  test "versions_count returns number of versions" do
+    meeting = meetings(:regular_meeting)
+    assert_equal 1, meeting.versions_count
+  end
+
+  test "cascade deletes through versions" do
+    meeting = meetings(:regular_meeting)
+    version_ids = meeting.agenda_version_ids
+    section_ids = meeting.current_version.agenda_section_ids
+    item_ids = meeting.current_version.agenda_item_ids
+
+    assert version_ids.any?
     assert section_ids.any?
     assert item_ids.any?
 
     meeting.destroy!
 
+    assert_empty AgendaVersion.where(id: version_ids)
     assert_empty AgendaSection.where(id: section_ids)
     assert_empty AgendaItem.where(id: item_ids)
   end
