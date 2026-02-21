@@ -1,0 +1,8 @@
+budget:
+  name: Budget
+
+infrastructure:
+  name: Infrastructure
+
+housing:
+  name: Housing

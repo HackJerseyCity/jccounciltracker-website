@@ -69,6 +69,9 @@
                       <% if item.file_number.present? %>
                         <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-50 text-blue-700"><%= item.file_number %></span>
                       <% end %>
+                      <% item.tags.each do |tag| %>
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800"><%= tag.name %></span>
+                      <% end %>
                       <% if item.page_start.present? %>
                         <span class="text-xs text-gray-400">pp. <%= item.page_start %>-<%= item.page_end %></span>
                       <% end %>

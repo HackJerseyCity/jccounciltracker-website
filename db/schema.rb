@@ -10,7 +10,17 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_21_170527) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_21_213459) do
+  create_table "agenda_item_tags", force: :cascade do |t|
+    t.integer "agenda_item_id", null: false
+    t.datetime "created_at", null: false
+    t.integer "tag_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["agenda_item_id", "tag_id"], name: "index_agenda_item_tags_on_agenda_item_id_and_tag_id", unique: true
+    t.index ["agenda_item_id"], name: "index_agenda_item_tags_on_agenda_item_id"
+    t.index ["tag_id"], name: "index_agenda_item_tags_on_tag_id"
+  end
+
   create_table "agenda_items", force: :cascade do |t|
     t.integer "agenda_section_id", null: false
     t.datetime "created_at", null: false
@@ -92,6 +102,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_21_170527) do
     t.index ["user_id"], name: "index_sessions_on_user_id"
   end
 
+  create_table "tags", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "name", null: false
+    t.datetime "updated_at", null: false
+    t.index "LOWER(name)", name: "index_tags_on_lower_name", unique: true
+  end
+
   create_table "users", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "email_address", null: false
@@ -115,6 +132,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_21_170527) do
     t.index ["council_member_id"], name: "index_votes_on_council_member_id"
   end
 
+  add_foreign_key "agenda_item_tags", "agenda_items"
+  add_foreign_key "agenda_item_tags", "tags"
   add_foreign_key "agenda_items", "agenda_sections"
   add_foreign_key "agenda_sections", "agenda_versions"
   add_foreign_key "agenda_versions", "meetings"

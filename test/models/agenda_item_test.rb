@@ -99,6 +99,21 @@ class AgendaItemTest < ActiveSupport::TestCase
     assert_includes item.errors[:result], "is not included in the list"
   end
 
+  # --- tags association ---
+
+  test "has_many tags through agenda_item_tags" do
+    item = agenda_items(:ordinance_with_details)
+    assert_includes item.tags, tags(:budget)
+    assert_includes item.tags, tags(:infrastructure)
+  end
+
+  test "destroying agenda_item destroys associated agenda_item_tags" do
+    item = agenda_items(:ordinance_with_details)
+    assert_difference "AgendaItemTag.count", -item.agenda_item_tags.count do
+      item.destroy
+    end
+  end
+
   # --- voted_on scope ---
 
   test "voted_on scope returns items with a result" do

@@ -1,0 +1,32 @@
+<div id="agenda_item_<%= agenda_item.id %>_tags"
+     data-controller="tag-typeahead"
+     data-tag-typeahead-search-url-value="<%= search_admin_tags_path %>"
+     data-tag-typeahead-create-url-value="<%= admin_agenda_item_tags_path %>"
+     data-tag-typeahead-agenda-item-id-value="<%= agenda_item.id %>"
+     class="flex flex-wrap items-center gap-1.5">
+  <% agenda_item.tags.alphabetical.each do |tag| %>
+    <span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+      <%= tag.name %>
+      <%= button_to admin_agenda_item_tag_path(agenda_item.agenda_item_tags.find_by(tag: tag), agenda_item_id: agenda_item.id),
+            method: :delete,
+            class: "ml-0.5 text-indigo-600 hover:text-indigo-900 cursor-pointer",
+            data: { turbo_stream: true } do %>
+        <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      <% end %>
+    </span>
+  <% end %>
+
+  <div class="relative" data-tag-typeahead-target="container">
+    <input type="text"
+           data-tag-typeahead-target="input"
+           data-action="input->tag-typeahead#onInput keydown->tag-typeahead#onKeydown"
+           placeholder="Add tag..."
+           class="px-2 py-0.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 w-24"
+           autocomplete="off" />
+    <ul data-tag-typeahead-target="dropdown"
+        class="hidden absolute z-10 mt-1 w-48 bg-white border border-gray-200 rounded-md shadow-lg max-h-40 overflow-auto text-xs">
+    </ul>
+  </div>
+</div>

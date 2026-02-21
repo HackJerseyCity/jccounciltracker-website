@@ -5,7 +5,7 @@ module Admin
     end
 
     def show
-      @meeting = Meeting.includes(agenda_versions: { agenda_sections: :agenda_items }).find(params[:id])
+      @meeting = Meeting.includes(agenda_versions: { agenda_sections: { agenda_items: :tags } }).find(params[:id])
       @agenda_version = if params[:version].present?
         @meeting.version(params[:version])
       else

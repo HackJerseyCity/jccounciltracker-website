@@ -1,0 +1,7 @@
+ordinance_budget:
+  agenda_item: ordinance_with_details
+  tag: budget
+
+ordinance_infrastructure:
+  agenda_item: ordinance_with_details
+  tag: infrastructure

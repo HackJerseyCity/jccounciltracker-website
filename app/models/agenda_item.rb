@@ -5,6 +5,8 @@ class AgendaItem < ApplicationRecord
   has_one :agenda_version, through: :agenda_section
   has_one :meeting, through: :agenda_version
   has_many :votes, dependent: :destroy
+  has_many :agenda_item_tags, dependent: :destroy
+  has_many :tags, through: :agenda_item_tags
 
   enum :item_type, {
     ordinance: "ordinance",

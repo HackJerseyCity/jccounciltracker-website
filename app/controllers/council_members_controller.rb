@@ -13,7 +13,7 @@ class CouncilMembersController < ApplicationController
   def show
     @council_member = CouncilMember.find(params[:id])
     @votes = @council_member.votes
-      .eager_load(agenda_item: { agenda_section: { agenda_version: :meeting } })
+      .eager_load(agenda_item: [ :tags, { agenda_section: { agenda_version: :meeting } } ])
       .order("meetings.date DESC, agenda_items.item_number ASC")
   end
 end

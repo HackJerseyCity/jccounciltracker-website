@@ -13,6 +13,10 @@ Rails.application.routes.draw do
       delete :delete_minutes, on: :member
     end
     resources :council_members
+    resources :tags, only: [] do
+      get :search, on: :collection
+    end
+    resources :agenda_item_tags, only: [ :create, :destroy ]
   end
 
   resources :meetings, only: [ :index, :show ]

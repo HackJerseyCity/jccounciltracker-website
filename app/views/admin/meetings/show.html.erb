@@ -64,6 +64,7 @@
               <th class="px-6 py-2 text-left text-xs font-medium text-gray-500 uppercase">Pages</th>
               <th class="px-6 py-2 text-left text-xs font-medium text-gray-500 uppercase">PDF</th>
               <th class="px-6 py-2 text-left text-xs font-medium text-gray-500 uppercase">Result</th>
+              <th class="px-6 py-2 text-left text-xs font-medium text-gray-500 uppercase">Tags</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-200">
@@ -93,6 +94,9 @@
                       <span class="text-gray-500 ml-1">(<%= item.vote_tally %>)</span>
                     <% end %>
                   <% end %>
+                </td>
+                <td class="px-6 py-3 text-sm">
+                  <%= render "admin/agenda_item_tags/tags", agenda_item: item %>
                 </td>
               </tr>
             <% end %>

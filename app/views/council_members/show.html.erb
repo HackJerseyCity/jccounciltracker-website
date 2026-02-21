@@ -37,6 +37,13 @@
               <td class="px-6 py-3 text-sm text-gray-900">
                 <span class="text-gray-400"><%= vote.agenda_item.item_number %></span>
                 <%= vote.agenda_item.title %>
+                <% if vote.agenda_item.tags.any? %>
+                  <div class="mt-1 flex flex-wrap gap-1">
+                    <% vote.agenda_item.tags.each do |tag| %>
+                      <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800"><%= tag.name %></span>
+                    <% end %>
+                  </div>
+                <% end %>
               </td>
               <td class="px-6 py-3 whitespace-nowrap text-sm">
                 <% if vote.agenda_item.result.present? %>
