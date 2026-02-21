@@ -77,6 +77,18 @@ module Admin
       redirect_to admin_meeting_path(@meeting), notice: "Minutes data deleted."
     end
 
+    def publish
+      @meeting = Meeting.find(params[:id])
+      @agenda_version = @meeting.agenda_versions.find(params[:version_id])
+      if @agenda_version.published?
+        @agenda_version.unpublish!
+        redirect_to admin_meeting_path(@meeting), notice: "Version #{@agenda_version.version_number} unpublished."
+      else
+        @agenda_version.publish!
+        redirect_to admin_meeting_path(@meeting), notice: "Version #{@agenda_version.version_number} published."
+      end
+    end
+
     def destroy
       @meeting = Meeting.find(params[:id])
       @meeting.destroy!

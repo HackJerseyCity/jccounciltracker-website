@@ -60,6 +60,43 @@ class AgendaVersionTest < ActiveSupport::TestCase
     assert_match(/- Latest/, label)
   end
 
+  test "status defaults to draft" do
+    version = AgendaVersion.create!(meeting: meetings(:regular_meeting), version_number: 99)
+    assert_equal "draft", version.status
+  end
+
+  test "published scope returns only published versions" do
+    v1 = agenda_versions(:regular_meeting_v1)
+    v2 = AgendaVersion.create!(meeting: v1.meeting, version_number: 2, status: :draft)
+
+    published = AgendaVersion.published
+    assert_includes published, v1
+    assert_not_includes published, v2
+  end
+
+  test "draft scope returns only draft versions" do
+    v1 = agenda_versions(:regular_meeting_v1)
+    v2 = AgendaVersion.create!(meeting: v1.meeting, version_number: 2, status: :draft)
+
+    drafts = AgendaVersion.draft
+    assert_not_includes drafts, v1
+    assert_includes drafts, v2
+  end
+
+  test "publish! changes status to published" do
+    version = AgendaVersion.create!(meeting: meetings(:regular_meeting), version_number: 99)
+    assert version.draft?
+    version.publish!
+    assert version.published?
+  end
+
+  test "unpublish! changes status to draft" do
+    version = agenda_versions(:regular_meeting_v1)
+    assert version.published?
+    version.unpublish!
+    assert version.draft?
+  end
+
   test "cascade deletes agenda_sections and agenda_items" do
     version = agenda_versions(:regular_meeting_v1)
     section_ids = version.agenda_section_ids

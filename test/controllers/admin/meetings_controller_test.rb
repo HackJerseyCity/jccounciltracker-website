@@ -81,8 +81,8 @@ class Admin::MeetingsControllerTest < ActionDispatch::IntegrationTest
     meeting = Meeting.find_by(date: "2026-04-01", meeting_type: "special")
     assert_redirected_to admin_meeting_path(meeting)
     assert_equal "Meeting agenda imported successfully.", flash[:notice]
-    assert_equal 1, meeting.agenda_sections.count
-    assert_equal 1, meeting.agenda_items.count
+    assert_equal 1, meeting.current_version.agenda_sections.count
+    assert_equal 1, meeting.current_version.agenda_items.count
   end
 
   test "create without file" do
@@ -217,6 +217,42 @@ class Admin::MeetingsControllerTest < ActionDispatch::IntegrationTest
     assert_equal 0, item.votes.count
 
     assert_not meeting.reload.minutes_imported?
+  end
+
+  # --- publish ---
+
+  test "publish toggles draft to published" do
+    sign_in_as(users(:content_admin))
+    meeting = meetings(:regular_meeting)
+    version = agenda_versions(:regular_meeting_v1)
+    version.update!(status: :draft)
+
+    post publish_admin_meeting_path(meeting), params: { version_id: version.id }
+
+    assert_redirected_to admin_meeting_path(meeting)
+    assert version.reload.published?
+    assert_match(/published/, flash[:notice])
+  end
+
+  test "publish toggles published to draft" do
+    sign_in_as(users(:content_admin))
+    meeting = meetings(:regular_meeting)
+    version = agenda_versions(:regular_meeting_v1)
+    assert version.published?
+
+    post publish_admin_meeting_path(meeting), params: { version_id: version.id }
+
+    assert_redirected_to admin_meeting_path(meeting)
+    assert version.reload.draft?
+    assert_match(/unpublished/, flash[:notice])
+  end
+
+  test "publish requires authentication" do
+    meeting = meetings(:regular_meeting)
+    version = agenda_versions(:regular_meeting_v1)
+
+    post publish_admin_meeting_path(meeting), params: { version_id: version.id }
+    assert_redirected_to new_session_path
   end
 
   # --- destroy ---

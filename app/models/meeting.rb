@@ -21,16 +21,28 @@ class Meeting < ApplicationRecord
     agenda_versions.find_by(version_number: number)
   end
 
+  def published_versions
+    agenda_versions.published
+  end
+
+  def current_published_version
+    published_versions.last
+  end
+
+  def published_versions_count
+    published_versions.size
+  end
+
   def agenda_sections
-    current_version&.agenda_sections || AgendaSection.none
+    current_published_version&.agenda_sections || AgendaSection.none
   end
 
   def agenda_items
-    current_version&.agenda_items || AgendaItem.none
+    current_published_version&.agenda_items || AgendaItem.none
   end
 
   def agenda_pages
-    current_version&.agenda_pages
+    current_published_version&.agenda_pages
   end
 
   def versions_count

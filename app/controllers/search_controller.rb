@@ -39,6 +39,7 @@ class SearchController < ApplicationController
   def base_scope
     AgendaItem.joins(agenda_section: { agenda_version: :meeting })
               .includes(:tags, agenda_section: { agenda_version: :meeting })
+              .where(agenda_versions: { status: :published })
   end
 
   def any_filters?

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_21_213459) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_21_231230) do
   create_table "agenda_item_tags", force: :cascade do |t|
     t.integer "agenda_item_id", null: false
     t.datetime "created_at", null: false
@@ -54,10 +54,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_21_213459) do
     t.integer "agenda_pages"
     t.datetime "created_at", null: false
     t.integer "meeting_id", null: false
+    t.string "status", default: "draft", null: false
     t.datetime "updated_at", null: false
     t.integer "version_number", default: 1, null: false
     t.index ["meeting_id", "version_number"], name: "index_agenda_versions_on_meeting_id_and_version_number", unique: true
     t.index ["meeting_id"], name: "index_agenda_versions_on_meeting_id"
+    t.index ["status"], name: "index_agenda_versions_on_status"
   end
 
   create_table "council_members", force: :cascade do |t|

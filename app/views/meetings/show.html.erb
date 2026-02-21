@@ -11,12 +11,12 @@
     <% end %>
   </div>
 
-  <% if @meeting.agenda_versions.size > 1 %>
+  <% if @meeting.published_versions.size > 1 %>
     <div class="mt-4">
       <%= form_with url: meeting_path(@meeting), method: :get, local: true, class: "flex items-center gap-3" do %>
         <label for="version" class="text-sm font-medium text-gray-700">Agenda version:</label>
         <select name="version" id="version" onchange="this.form.requestSubmit()" class="block rounded-md border-gray-300 shadow-sm text-sm focus:border-blue-500 focus:ring-blue-500">
-          <% @meeting.agenda_versions.each do |v| %>
+          <% @meeting.published_versions.each do |v| %>
             <option value="<%= v.version_number %>" <%= "selected" if v == @agenda_version %>><%= v.display_label %></option>
           <% end %>
         </select>

@@ -11,6 +11,7 @@ Rails.application.routes.draw do
     resources :meetings, only: [ :index, :show, :new, :create, :destroy ] do
       post :import_minutes, on: :member
       delete :delete_minutes, on: :member
+      post :publish, on: :member
     end
     resources :council_members
     resources :tags, only: [] do

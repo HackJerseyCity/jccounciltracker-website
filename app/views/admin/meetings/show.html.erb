@@ -1,6 +1,13 @@
 <div class="flex items-center justify-between mb-6">
   <div class="flex items-center gap-3">
     <h1 class="text-2xl font-bold text-gray-900"><%= @meeting.display_name %></h1>
+    <% if @agenda_version %>
+      <% if @agenda_version.published? %>
+        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Published</span>
+      <% else %>
+        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">Draft</span>
+      <% end %>
+    <% end %>
     <% if @meeting.minutes_imported? %>
       <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Minutes imported</span>
     <% end %>
@@ -10,6 +17,13 @@
     <%= form_with url: import_minutes_admin_meeting_path(@meeting), method: :post, multipart: true, class: "flex items-center gap-2" do %>
       <input type="file" name="minutes_file" accept=".json" class="text-sm text-gray-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 file:cursor-pointer" />
       <button type="submit" class="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors cursor-pointer">Import Minutes</button>
+    <% end %>
+    <% if @agenda_version %>
+      <% if @agenda_version.draft? %>
+        <%= button_to "Publish", publish_admin_meeting_path(@meeting, version_id: @agenda_version.id), method: :post, class: "inline-flex items-center px-3 py-1.5 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors cursor-pointer" %>
+      <% else %>
+        <%= button_to "Unpublish", publish_admin_meeting_path(@meeting, version_id: @agenda_version.id), method: :post, class: "inline-flex items-center px-3 py-1.5 bg-yellow-600 text-white text-sm font-medium rounded-lg hover:bg-yellow-700 transition-colors cursor-pointer", data: { turbo_confirm: "Are you sure you want to unpublish this version? It will no longer be visible to the public." } %>
+      <% end %>
     <% end %>
     <% if @meeting.minutes_imported? %>
       <%= button_to "Delete Minutes", delete_minutes_admin_meeting_path(@meeting), method: :delete, class: "inline-flex items-center px-3 py-1.5 bg-yellow-600 text-white text-sm font-medium rounded-lg hover:bg-yellow-700 transition-colors cursor-pointer", data: { turbo_confirm: "Are you sure you want to delete minutes data? This will remove all vote records for this meeting." } %>
@@ -24,7 +38,7 @@
       <label for="version" class="text-sm font-medium text-gray-700">Agenda version:</label>
       <select name="version" id="version" onchange="this.form.requestSubmit()" class="block rounded-md border-gray-300 shadow-sm text-sm focus:border-blue-500 focus:ring-blue-500">
         <% @meeting.agenda_versions.each do |v| %>
-          <option value="<%= v.version_number %>" <%= "selected" if v == @agenda_version %>><%= v.display_label %></option>
+          <option value="<%= v.version_number %>" <%= "selected" if v == @agenda_version %>><%= v.display_label %> [<%= v.status.capitalize %>]</option>
         <% end %>
       </select>
     <% end %>

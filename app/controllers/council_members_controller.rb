@@ -14,6 +14,7 @@ class CouncilMembersController < ApplicationController
     @council_member = CouncilMember.find(params[:id])
     @votes = @council_member.votes
       .eager_load(agenda_item: [ :tags, { agenda_section: { agenda_version: :meeting } } ])
+      .where(agenda_versions: { status: :published })
       .order("meetings.date DESC, agenda_items.item_number ASC")
   end
 end

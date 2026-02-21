@@ -138,4 +138,12 @@ class SearchControllerTest < ActionDispatch::IntegrationTest
     get search_path, params: { q: "Ordinance", page: -5 }
     assert_response :success
   end
+
+  test "items from draft versions excluded from results" do
+    agenda_versions(:regular_meeting_v1).update!(status: :draft)
+
+    get search_path, params: { q: "Fees" }
+    assert_response :success
+    assert_select "p", text: /No agenda items match/
+  end
 end

@@ -81,6 +81,43 @@ class MeetingTest < ActiveSupport::TestCase
     assert_empty AgendaItem.where(id: item_ids)
   end
 
+  test "current_published_version returns latest published version" do
+    meeting = meetings(:regular_meeting)
+    v1 = agenda_versions(:regular_meeting_v1)
+    v2 = AgendaVersion.create!(meeting: meeting, version_number: 2, status: :draft)
+
+    assert_equal v1, meeting.current_published_version
+  end
+
+  test "current_published_version returns nil when all draft" do
+    meeting = meetings(:regular_meeting)
+    agenda_versions(:regular_meeting_v1).unpublish!
+
+    assert_nil meeting.current_published_version
+  end
+
+  test "agenda_sections delegates through published version" do
+    meeting = meetings(:regular_meeting)
+    v2 = AgendaVersion.create!(meeting: meeting, version_number: 2, status: :draft)
+
+    assert_includes meeting.agenda_sections, agenda_sections(:ordinance_first_reading)
+    assert_includes meeting.agenda_sections, agenda_sections(:resolutions)
+  end
+
+  test "agenda_items delegates through published version" do
+    meeting = meetings(:regular_meeting)
+    v2 = AgendaVersion.create!(meeting: meeting, version_number: 2, status: :draft)
+
+    assert_includes meeting.agenda_items, agenda_items(:ordinance_with_details)
+  end
+
+  test "published_versions_count only counts published" do
+    meeting = meetings(:regular_meeting)
+    AgendaVersion.create!(meeting: meeting, version_number: 2, status: :draft)
+
+    assert_equal 1, meeting.published_versions_count
+  end
+
   test "chronological scope orders by date desc" do
     older = Meeting.create!(date: Date.new(2026, 1, 1), meeting_type: :special)
     meetings = Meeting.chronological
