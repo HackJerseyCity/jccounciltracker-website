@@ -1,0 +1,32 @@
+ordinance_with_details:
+  agenda_section: ordinance_first_reading
+  item_number: "3.1"
+  title: "An Ordinance amending and supplementing Chapter 160 - Fees and Charges."
+  page_start: 10
+  page_end: 13
+  file_number: "Ord. 26-009"
+  item_type: ordinance
+  url: "http://example.com/ordinance.pdf"
+  position: 0
+
+resolution_item:
+  agenda_section: resolutions
+  item_number: "10.1"
+  title: "A Resolution recognizing and designating April 2026 as Native Plant Month"
+  page_start: 152
+  page_end: 154
+  file_number: "Res. 26-068"
+  item_type: resolution
+  url: "http://example.com/resolution.pdf"
+  position: 0
+
+item_with_nulls:
+  agenda_section: ordinance_first_reading
+  item_number: "3.2"
+  title: "A simple agenda item with no optional fields"
+  page_start:
+  page_end:
+  file_number:
+  item_type: other
+  url:
+  position: 1

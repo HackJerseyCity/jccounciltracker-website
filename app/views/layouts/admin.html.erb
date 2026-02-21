@@ -27,6 +27,7 @@
 
             <div class="hidden sm:flex items-center gap-4 text-sm text-gray-300">
               <%= link_to "Dashboard", admin_dashboard_path, class: "hover:text-white transition-colors" %>
+              <%= link_to "Meetings", admin_meetings_path, class: "hover:text-white transition-colors" %>
               <% if Current.session&.user&.site_admin? %>
                 <%= link_to "Invitations", admin_invitations_path, class: "hover:text-white transition-colors" %>
                 <%= link_to "Users", admin_users_path, class: "hover:text-white transition-colors" %>

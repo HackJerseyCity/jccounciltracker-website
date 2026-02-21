@@ -10,7 +10,34 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_21_151202) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_21_153553) do
+  create_table "agenda_items", force: :cascade do |t|
+    t.integer "agenda_section_id", null: false
+    t.datetime "created_at", null: false
+    t.string "file_number"
+    t.string "item_number", null: false
+    t.string "item_type", null: false
+    t.integer "page_end"
+    t.integer "page_start"
+    t.integer "position", default: 0, null: false
+    t.text "title", null: false
+    t.datetime "updated_at", null: false
+    t.string "url"
+    t.index ["agenda_section_id", "item_number"], name: "index_agenda_items_on_agenda_section_id_and_item_number", unique: true
+    t.index ["agenda_section_id"], name: "index_agenda_items_on_agenda_section_id"
+  end
+
+  create_table "agenda_sections", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.integer "meeting_id", null: false
+    t.integer "number", null: false
+    t.string "section_type", null: false
+    t.string "title", null: false
+    t.datetime "updated_at", null: false
+    t.index ["meeting_id", "number"], name: "index_agenda_sections_on_meeting_id_and_number", unique: true
+    t.index ["meeting_id"], name: "index_agenda_sections_on_meeting_id"
+  end
+
   create_table "invitations", force: :cascade do |t|
     t.datetime "accepted_at"
     t.integer "accepted_by_id"
@@ -23,6 +50,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_21_151202) do
     t.index ["accepted_by_id"], name: "index_invitations_on_accepted_by_id"
     t.index ["invited_by_id"], name: "index_invitations_on_invited_by_id"
     t.index ["token"], name: "index_invitations_on_token", unique: true
+  end
+
+  create_table "meetings", force: :cascade do |t|
+    t.integer "agenda_pages"
+    t.datetime "created_at", null: false
+    t.date "date", null: false
+    t.string "meeting_type", null: false
+    t.datetime "updated_at", null: false
+    t.index ["date", "meeting_type"], name: "index_meetings_on_date_and_meeting_type", unique: true
   end
 
   create_table "sessions", force: :cascade do |t|
@@ -45,6 +81,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_21_151202) do
     t.index ["role"], name: "index_users_on_role"
   end
 
+  add_foreign_key "agenda_items", "agenda_sections"
+  add_foreign_key "agenda_sections", "meetings"
   add_foreign_key "invitations", "users", column: "accepted_by_id"
   add_foreign_key "invitations", "users", column: "invited_by_id"
   add_foreign_key "sessions", "users"
