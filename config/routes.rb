@@ -10,11 +10,13 @@ Rails.application.routes.draw do
     resources :users, only: [ :index ]
     resources :meetings, only: [ :index, :show, :new, :create, :destroy ] do
       post :import_minutes, on: :member
+      delete :delete_minutes, on: :member
     end
     resources :council_members
   end
 
   resources :meetings, only: [ :index, :show ]
+  resources :council_members, only: [ :index, :show ]
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
   # Can be used by load balancers and uptime monitors to verify that the app is live.

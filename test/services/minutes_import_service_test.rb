@@ -121,6 +121,29 @@ class MinutesImportServiceTest < ActiveSupport::TestCase
     assert_nil item.result
   end
 
+  test "handles position-to-names vote format" do
+    data = {
+      "meeting" => { "type" => "regular", "date" => "2026-02-25" },
+      "council_members" => [ "Ridley", "Lavarro" ],
+      "items" => [
+        {
+          "item_number" => "3.1",
+          "result" => "approved",
+          "vote_tally" => "1-1",
+          "votes" => { "aye" => [ "Ridley" ], "nay" => [ "Lavarro" ], "abstain" => [], "absent" => [] }
+        }
+      ]
+    }
+
+    service = MinutesImportService.new(data).call
+    assert service.success?
+
+    item = agenda_items(:ordinance_with_details).reload
+    assert_equal 2, item.votes.count
+    assert_equal "aye", item.votes.find_by(council_member: council_members(:ridley)).position
+    assert_equal "nay", item.votes.find_by(council_member: council_members(:lavarro)).position
+  end
+
   test "invalid JSON structure returns error" do
     service = MinutesImportService.new("not a hash").call
     assert_not service.success?

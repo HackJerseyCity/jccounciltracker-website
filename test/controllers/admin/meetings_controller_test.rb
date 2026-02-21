@@ -197,6 +197,28 @@ class Admin::MeetingsControllerTest < ActionDispatch::IntegrationTest
     assert_match(/No meeting found/, flash[:alert])
   end
 
+  # --- delete_minutes ---
+
+  test "delete_minutes removes votes and clears results" do
+    sign_in_as(users(:content_admin))
+    meeting = meetings(:regular_meeting)
+
+    # Fixture votes exist on ordinance_with_details
+    assert meeting.minutes_imported?
+
+    delete delete_minutes_admin_meeting_path(meeting)
+
+    assert_redirected_to admin_meeting_path(meeting)
+    assert_equal "Minutes data deleted.", flash[:notice]
+
+    item = agenda_items(:ordinance_with_details).reload
+    assert_nil item.result
+    assert_nil item.vote_tally
+    assert_equal 0, item.votes.count
+
+    assert_not meeting.reload.minutes_imported?
+  end
+
   # --- destroy ---
 
   test "destroy as content_admin" do

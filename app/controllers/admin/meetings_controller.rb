@@ -64,6 +64,19 @@ module Admin
       redirect_to admin_meeting_path(@meeting), alert: "Invalid JSON file."
     end
 
+    def delete_minutes
+      @meeting = Meeting.find(params[:id])
+
+      ActiveRecord::Base.transaction do
+        @meeting.agenda_items.each do |item|
+          item.votes.delete_all
+          item.update!(result: nil, vote_tally: nil)
+        end
+      end
+
+      redirect_to admin_meeting_path(@meeting), notice: "Minutes data deleted."
+    end
+
     def destroy
       @meeting = Meeting.find(params[:id])
       @meeting.destroy!

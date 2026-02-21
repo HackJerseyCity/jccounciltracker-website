@@ -107,17 +107,34 @@ class MinutesImportService
       return
     end
 
+    # Normalize votes: accept both { "aye": ["Name", ...] } and { "Name": "aye" }
+    normalized = normalize_votes(votes_hash)
+
     # Clear stale votes for this item that aren't in the new data
-    incoming_member_ids = votes_hash.keys.filter_map { |name| @council_members[name.downcase]&.id }
+    incoming_member_ids = normalized.keys.filter_map { |name| @council_members[name.downcase]&.id }
     agenda_item.votes.where.not(council_member_id: incoming_member_ids).delete_all
 
-    votes_hash.each do |last_name, position|
+    normalized.each do |last_name, position|
       council_member = @council_members[last_name.downcase]
       next unless council_member
 
       vote = agenda_item.votes.find_or_initialize_by(council_member: council_member)
       vote.position = position
       vote.save!
+    end
+  end
+
+  def normalize_votes(votes_hash)
+    # Format: { "aye": ["Ridley", "Lavarro"], "nay": ["Smith"] }
+    if votes_hash.values.first.is_a?(Array)
+      result = {}
+      votes_hash.each do |position, names|
+        names.each { |name| result[name] = position }
+      end
+      result
+    else
+      # Format: { "Ridley": "aye", "Lavarro": "nay" }
+      votes_hash
     end
   end
 end
