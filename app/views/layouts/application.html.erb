@@ -35,8 +35,8 @@
 
           <div class="hidden sm:flex items-center gap-6 text-sm font-medium text-gray-600">
             <%= link_to "Meetings", meetings_path, class: "hover:text-blue-700 transition-colors" %>
-            <%= link_to "Council Members", "#", class: "hover:text-blue-700 transition-colors" %>
-            <%= link_to "Topics", "#", class: "hover:text-blue-700 transition-colors" %>
+            <span class="text-gray-400 cursor-default" title="Coming soon">Council Members <sup class="text-[10px]">soon</sup></span>
+            <span class="text-gray-400 cursor-default" title="Coming soon">Topics <sup class="text-[10px]">soon</sup></span>
             <% if authenticated? %>
               <% if Current.session&.user&.admin? %>
                 <%= link_to "Admin", admin_dashboard_path, class: "hover:text-blue-700 transition-colors" %>
