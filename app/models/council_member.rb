@@ -1,4 +1,7 @@
 class CouncilMember < ApplicationRecord
+  has_many :votes, dependent: :destroy
+  has_many :voted_agenda_items, through: :votes, source: :agenda_item
+
   enum :seat, {
     ward_a: "ward_a", ward_b: "ward_b", ward_c: "ward_c",
     ward_d: "ward_d", ward_e: "ward_e", ward_f: "ward_f",

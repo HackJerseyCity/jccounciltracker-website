@@ -121,6 +121,82 @@ class Admin::MeetingsControllerTest < ActionDispatch::IntegrationTest
     assert_match(/New version/, flash[:notice])
   end
 
+  # --- import_minutes ---
+
+  test "import_minutes with valid JSON" do
+    sign_in_as(users(:content_admin))
+    meeting = meetings(:regular_meeting)
+
+    json_data = {
+      meeting: { type: "regular", date: "2026-02-25" },
+      council_members: [ "Ridley" ],
+      items: [
+        {
+          item_number: "10.1",
+          result: "approved",
+          vote_tally: "9-0",
+          votes: { Ridley: "aye" }
+        }
+      ]
+    }.to_json
+
+    file = Rack::Test::UploadedFile.new(
+      StringIO.new(json_data), "application/json", false, original_filename: "minutes.json"
+    )
+
+    assert_difference "Vote.count", 1 do
+      post import_minutes_admin_meeting_path(meeting), params: { minutes_file: file }
+    end
+
+    assert_redirected_to admin_meeting_path(meeting)
+    assert_match(/Minutes imported successfully/, flash[:notice])
+
+    item = agenda_items(:resolution_item).reload
+    assert_equal "approved", item.result
+    assert_equal "9-0", item.vote_tally
+  end
+
+  test "import_minutes without file" do
+    sign_in_as(users(:content_admin))
+    meeting = meetings(:regular_meeting)
+
+    post import_minutes_admin_meeting_path(meeting)
+    assert_redirected_to admin_meeting_path(meeting)
+    assert_equal "Please select a JSON file to upload.", flash[:alert]
+  end
+
+  test "import_minutes with invalid JSON" do
+    sign_in_as(users(:content_admin))
+    meeting = meetings(:regular_meeting)
+
+    file = Rack::Test::UploadedFile.new(
+      StringIO.new("not json"), "application/json", false, original_filename: "bad.json"
+    )
+
+    post import_minutes_admin_meeting_path(meeting), params: { minutes_file: file }
+    assert_redirected_to admin_meeting_path(meeting)
+    assert_equal "Invalid JSON file.", flash[:alert]
+  end
+
+  test "import_minutes with missing meeting returns error" do
+    sign_in_as(users(:content_admin))
+    meeting = meetings(:regular_meeting)
+
+    json_data = {
+      meeting: { type: "special", date: "2099-01-01" },
+      council_members: [],
+      items: []
+    }.to_json
+
+    file = Rack::Test::UploadedFile.new(
+      StringIO.new(json_data), "application/json", false, original_filename: "minutes.json"
+    )
+
+    post import_minutes_admin_meeting_path(meeting), params: { minutes_file: file }
+    assert_redirected_to admin_meeting_path(meeting)
+    assert_match(/No meeting found/, flash[:alert])
+  end
+
   # --- destroy ---
 
   test "destroy as content_admin" do

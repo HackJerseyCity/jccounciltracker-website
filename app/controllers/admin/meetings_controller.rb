@@ -42,6 +42,28 @@ module Admin
       render :new, status: :unprocessable_entity
     end
 
+    def import_minutes
+      @meeting = Meeting.find(params[:id])
+
+      unless params[:minutes_file].present?
+        redirect_to admin_meeting_path(@meeting), alert: "Please select a JSON file to upload."
+        return
+      end
+
+      data = JSON.parse(params[:minutes_file].read)
+      service = MinutesImportService.new(data).call
+
+      if service.success?
+        notice = "Minutes imported successfully."
+        notice += " Warnings: #{service.warnings.join('; ')}" if service.warnings.any?
+        redirect_to admin_meeting_path(@meeting), notice: notice
+      else
+        redirect_to admin_meeting_path(@meeting), alert: service.errors.join(", ")
+      end
+    rescue JSON::ParserError
+      redirect_to admin_meeting_path(@meeting), alert: "Invalid JSON file."
+    end
+
     def destroy
       @meeting = Meeting.find(params[:id])
       @meeting.destroy!

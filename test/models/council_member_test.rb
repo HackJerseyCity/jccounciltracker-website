@@ -96,4 +96,21 @@ class CouncilMemberTest < ActiveSupport::TestCase
     assert council_members(:lavarro).at_large?
     assert council_members(:former_member).ward_b?
   end
+
+  # --- votes association ---
+
+  test "has_many votes" do
+    assert_includes council_members(:ridley).votes, votes(:ridley_aye)
+  end
+
+  test "has_many voted_agenda_items through votes" do
+    assert_includes council_members(:ridley).voted_agenda_items, agenda_items(:ordinance_with_details)
+  end
+
+  test "destroying council_member destroys associated votes" do
+    member = council_members(:ridley)
+    assert_difference "Vote.count", -member.votes.count do
+      member.destroy
+    end
+  end
 end

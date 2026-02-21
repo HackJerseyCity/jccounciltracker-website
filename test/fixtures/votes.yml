@@ -1,0 +1,9 @@
+ridley_aye:
+  agenda_item: ordinance_with_details
+  council_member: ridley
+  position: aye
+
+lavarro_nay:
+  agenda_item: ordinance_with_details
+  council_member: lavarro
+  position: nay

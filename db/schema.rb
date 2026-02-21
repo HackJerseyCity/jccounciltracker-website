@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_21_163638) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_21_170527) do
   create_table "agenda_items", force: :cascade do |t|
     t.integer "agenda_section_id", null: false
     t.datetime "created_at", null: false
@@ -20,9 +20,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_21_163638) do
     t.integer "page_end"
     t.integer "page_start"
     t.integer "position", default: 0, null: false
+    t.string "result"
     t.text "title", null: false
     t.datetime "updated_at", null: false
     t.string "url"
+    t.string "vote_tally"
     t.index ["agenda_section_id", "item_number"], name: "index_agenda_items_on_agenda_section_id_and_item_number", unique: true
     t.index ["agenda_section_id"], name: "index_agenda_items_on_agenda_section_id"
   end
@@ -101,10 +103,24 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_21_163638) do
     t.index ["role"], name: "index_users_on_role"
   end
 
+  create_table "votes", force: :cascade do |t|
+    t.integer "agenda_item_id", null: false
+    t.integer "council_member_id", null: false
+    t.datetime "created_at", null: false
+    t.string "position", null: false
+    t.datetime "updated_at", null: false
+    t.index ["agenda_item_id", "council_member_id"], name: "index_votes_on_agenda_item_id_and_council_member_id", unique: true
+    t.index ["agenda_item_id"], name: "index_votes_on_agenda_item_id"
+    t.index ["council_member_id", "position"], name: "index_votes_on_council_member_id_and_position"
+    t.index ["council_member_id"], name: "index_votes_on_council_member_id"
+  end
+
   add_foreign_key "agenda_items", "agenda_sections"
   add_foreign_key "agenda_sections", "agenda_versions"
   add_foreign_key "agenda_versions", "meetings"
   add_foreign_key "invitations", "users", column: "accepted_by_id"
   add_foreign_key "invitations", "users", column: "invited_by_id"
   add_foreign_key "sessions", "users"
+  add_foreign_key "votes", "agenda_items"
+  add_foreign_key "votes", "council_members"
 end

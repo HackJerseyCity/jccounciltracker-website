@@ -37,6 +37,10 @@ class Meeting < ApplicationRecord
     agenda_versions.size
   end
 
+  def minutes_imported?
+    agenda_items.joins(:votes).exists?
+  end
+
   def display_name
     "#{meeting_type.titleize} Meeting - #{date.strftime('%B %-d, %Y')}"
   end

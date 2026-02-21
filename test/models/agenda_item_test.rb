@@ -60,4 +60,52 @@ class AgendaItemTest < ActiveSupport::TestCase
     assert agenda_items(:resolution_item).resolution?
     assert agenda_items(:item_with_nulls).other?
   end
+
+  # --- votes association ---
+
+  test "has_many votes" do
+    item = agenda_items(:ordinance_with_details)
+    assert_includes item.votes, votes(:ridley_aye)
+    assert_includes item.votes, votes(:lavarro_nay)
+  end
+
+  test "destroying agenda_item destroys associated votes" do
+    item = agenda_items(:ordinance_with_details)
+    assert_difference "Vote.count", -item.votes.count do
+      item.destroy
+    end
+  end
+
+  # --- result validation ---
+
+  test "allows nil result" do
+    item = agenda_items(:ordinance_with_details)
+    item.result = nil
+    assert item.valid?
+  end
+
+  test "allows valid result values" do
+    item = agenda_items(:ordinance_with_details)
+    AgendaItem::VALID_RESULTS.each do |result|
+      item.result = result
+      assert item.valid?, "Expected '#{result}' to be valid"
+    end
+  end
+
+  test "rejects invalid result values" do
+    item = agenda_items(:ordinance_with_details)
+    item.result = "invalid_result"
+    assert_not item.valid?
+    assert_includes item.errors[:result], "is not included in the list"
+  end
+
+  # --- voted_on scope ---
+
+  test "voted_on scope returns items with a result" do
+    item = agenda_items(:ordinance_with_details)
+    item.update!(result: "approved")
+
+    assert_includes AgendaItem.voted_on, item
+    assert_not_includes AgendaItem.voted_on, agenda_items(:resolution_item)
+  end
 end

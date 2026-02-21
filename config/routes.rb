@@ -8,7 +8,9 @@ Rails.application.routes.draw do
     get "/", to: "dashboard#show", as: :dashboard
     resources :invitations, only: [ :index, :new, :create, :destroy ]
     resources :users, only: [ :index ]
-    resources :meetings, only: [ :index, :show, :new, :create, :destroy ]
+    resources :meetings, only: [ :index, :show, :new, :create, :destroy ] do
+      post :import_minutes, on: :member
+    end
     resources :council_members
   end
 

@@ -1,7 +1,10 @@
 class AgendaItem < ApplicationRecord
+  VALID_RESULTS = %w[introduced approved adopted carried withdrawn defeated tabled amended].freeze
+
   belongs_to :agenda_section
   has_one :agenda_version, through: :agenda_section
   has_one :meeting, through: :agenda_version
+  has_many :votes, dependent: :destroy
 
   enum :item_type, {
     ordinance: "ordinance",
@@ -14,4 +17,7 @@ class AgendaItem < ApplicationRecord
   validates :title, presence: true
   validates :item_type, presence: true
   validates :position, presence: true
+  validates :result, inclusion: { in: VALID_RESULTS }, allow_nil: true
+
+  scope :voted_on, -> { where.not(result: nil) }
 end
