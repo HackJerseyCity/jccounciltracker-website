@@ -14,10 +14,11 @@ class AgendaSection < ApplicationRecord
     regular_meeting: "regular_meeting",
     reception_bid: "reception_bid",
     deferred: "deferred",
-    adjournment: "adjournment"
+    adjournment: "adjournment",
+    other: "other"
   }
 
-  validates :number, presence: true, uniqueness: { scope: :agenda_version_id }
+  validates :number, presence: true
   validates :title, presence: true
   validates :section_type, presence: true
 end

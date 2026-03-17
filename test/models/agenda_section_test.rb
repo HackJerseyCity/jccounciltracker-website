@@ -19,7 +19,7 @@ class AgendaSectionTest < ActiveSupport::TestCase
     assert_includes section.errors[:section_type], "can't be blank"
   end
 
-  test "validates uniqueness of number scoped to agenda_version" do
+  test "allows duplicate numbers within same agenda_version" do
     existing = agenda_sections(:ordinance_first_reading)
     duplicate = AgendaSection.new(
       agenda_version: existing.agenda_version,
@@ -27,8 +27,7 @@ class AgendaSectionTest < ActiveSupport::TestCase
       title: "Duplicate",
       section_type: :resolutions
     )
-    assert_not duplicate.valid?
-    assert_includes duplicate.errors[:number], "has already been taken"
+    assert duplicate.valid?
   end
 
   test "belongs_to agenda_version" do

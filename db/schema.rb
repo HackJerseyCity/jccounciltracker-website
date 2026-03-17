@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_21_231230) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_17_120646) do
   create_table "agenda_item_tags", force: :cascade do |t|
     t.integer "agenda_item_id", null: false
     t.datetime "created_at", null: false
@@ -46,7 +46,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_21_231230) do
     t.string "section_type", null: false
     t.string "title", null: false
     t.datetime "updated_at", null: false
-    t.index ["agenda_version_id", "number"], name: "index_agenda_sections_on_agenda_version_id_and_number", unique: true
+    t.index ["agenda_version_id", "number"], name: "index_agenda_sections_on_agenda_version_id_and_number"
     t.index ["agenda_version_id"], name: "index_agenda_sections_on_agenda_version_id"
   end
 
