@@ -22,7 +22,10 @@ servers:
 #
 proxy:
   ssl: true
-  host: jc-council.hackjc.org
+  hosts: 
+    - jc-council.hackjc.org
+    - jccounciltracker.com
+    - www.jccounciltracker.com
 
 # Where you keep your container images.
 registry:
