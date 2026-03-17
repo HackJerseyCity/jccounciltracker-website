@@ -1,0 +1,79 @@
+<div class="p-6 sm:p-8">
+  <h1 class="text-2xl font-bold text-gray-900 mb-6">Dashboard</h1>
+
+  <%# Recent Meetings %>
+  <section class="mb-8">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-lg font-semibold text-gray-900">Recent Meetings</h2>
+      <%= link_to "View all", meetings_path, class: "text-sm text-blue-600 hover:text-blue-700 font-medium" %>
+    </div>
+    <% if @recent_meetings.any? %>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <% @recent_meetings.each do |meeting| %>
+          <%= link_to meeting_path(meeting), class: "block bg-white rounded-lg border border-gray-200 p-5 hover:border-blue-300 hover:shadow-sm transition" do %>
+            <div class="flex items-center gap-2 mb-2">
+              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                <%= meeting.meeting_type.titleize %>
+              </span>
+            </div>
+            <h3 class="font-semibold text-gray-900"><%= meeting.date.strftime("%B %-d, %Y") %></h3>
+            <div class="mt-2 flex items-center gap-3 text-sm text-gray-500">
+              <span><%= meeting.agenda_sections.size %> sections</span>
+              <span><%= meeting.agenda_items.size %> items</span>
+            </div>
+          <% end %>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="bg-white rounded-lg border border-gray-200 p-8 text-center">
+        <p class="text-gray-500">No meetings available yet.</p>
+      </div>
+    <% end %>
+  </section>
+
+  <%# Council Members %>
+  <section class="mb-8">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-lg font-semibold text-gray-900">Council Members</h2>
+      <%= link_to "View all", council_members_path, class: "text-sm text-blue-600 hover:text-blue-700 font-medium" %>
+    </div>
+    <% if @current_members.any? %>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <% @current_members.each do |member| %>
+          <%= link_to council_member_path(member), class: "block bg-white rounded-lg border border-gray-200 p-5 hover:border-blue-300 hover:shadow-sm transition" do %>
+            <h3 class="font-semibold text-gray-900"><%= member.full_name %></h3>
+            <span class="inline-flex items-center mt-1.5 px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+              <%= member.seat_label %>
+            </span>
+          <% end %>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="bg-white rounded-lg border border-gray-200 p-8 text-center">
+        <p class="text-gray-500">No council members available yet.</p>
+      </div>
+    <% end %>
+  </section>
+
+  <%# Topics %>
+  <section>
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-lg font-semibold text-gray-900">Popular Topics</h2>
+      <%= link_to "View all", tags_path, class: "text-sm text-blue-600 hover:text-blue-700 font-medium" %>
+    </div>
+    <% if @top_tags.any? %>
+      <div class="flex flex-wrap gap-2">
+        <% @top_tags.each do |tag| %>
+          <%= link_to tag_path(tag), class: "inline-flex items-center gap-1.5 px-3 py-1.5 bg-white rounded-full border border-gray-200 text-sm font-medium text-gray-700 hover:border-blue-300 hover:text-blue-700 transition" do %>
+            <%= tag.name %>
+            <span class="text-xs text-gray-400"><%= tag.agenda_items_count %></span>
+          <% end %>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="bg-white rounded-lg border border-gray-200 p-8 text-center">
+        <p class="text-gray-500">No topics have been tagged yet.</p>
+      </div>
+    <% end %>
+  </section>
+</div>

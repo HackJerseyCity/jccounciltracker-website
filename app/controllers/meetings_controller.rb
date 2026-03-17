@@ -1,5 +1,6 @@
 class MeetingsController < ApplicationController
   allow_unauthenticated_access
+  layout "dashboard"
 
   def index
     @meetings = Meeting.includes(agenda_versions: { agenda_sections: :agenda_items }).chronological

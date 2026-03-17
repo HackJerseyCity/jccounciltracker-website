@@ -1,5 +1,6 @@
 class TagsController < ApplicationController
   allow_unauthenticated_access
+  layout "dashboard"
 
   def index
     @tags = Tag.alphabetical

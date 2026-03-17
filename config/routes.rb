@@ -22,6 +22,8 @@ Rails.application.routes.draw do
     end
   end
 
+  get "dashboard", to: "dashboard#show", as: :dashboard
+
   resources :meetings, only: [ :index, :show ]
   resources :council_members, only: [ :index, :show ]
   resources :tags, only: [ :index, :show ], path: "topics"
