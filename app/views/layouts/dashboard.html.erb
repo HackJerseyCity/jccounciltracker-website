@@ -41,6 +41,7 @@
             <%= button_to "Sign out", session_path, method: :delete, class: "hover:text-blue-700 transition-colors cursor-pointer" %>
           <% else %>
             <%= link_to "Sign in", new_session_path, class: "hover:text-blue-700 transition-colors" %>
+            <%= link_to "Sign up", new_signup_path, class: "hover:text-blue-700 transition-colors" %>
           <% end %>
         </div>
       </div>
@@ -62,6 +63,9 @@
           <%= sidebar_link("Meetings", meetings_path, "meetings") %>
           <%= sidebar_link("Council Members", council_members_path, "council_members") %>
           <%= sidebar_link("Topics", tags_path, "topics") %>
+          <% if authenticated? %>
+            <%= sidebar_link("Starred", stars_path, "starred") %>
+          <% end %>
           <%= sidebar_link("Search", search_path, "search") %>
         </nav>
       </aside>

@@ -4,7 +4,10 @@
     <span class="text-gray-900"><%= @tag.name %></span>
   </nav>
 
-  <h1 class="text-3xl font-bold text-gray-900 mb-8"><%= @tag.name %></h1>
+  <div class="flex items-center gap-2 mb-8">
+    <h1 class="text-3xl font-bold text-gray-900"><%= @tag.name %></h1>
+    <%= star_button(@tag) %>
+  </div>
 
   <% if @agenda_items.any? %>
     <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">

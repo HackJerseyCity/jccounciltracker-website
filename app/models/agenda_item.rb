@@ -1,4 +1,5 @@
 class AgendaItem < ApplicationRecord
+  include Starrable
   VALID_RESULTS = %w[introduced approved adopted carried withdrawn defeated tabled amended].freeze
 
   belongs_to :agenda_section

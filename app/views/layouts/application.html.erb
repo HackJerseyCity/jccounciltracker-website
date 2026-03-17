@@ -42,6 +42,7 @@
               <%= button_to "Sign out", session_path, method: :delete, class: "hover:text-blue-700 transition-colors cursor-pointer" %>
             <% else %>
               <%= link_to "Sign in", new_session_path, class: "hover:text-blue-700 transition-colors" %>
+              <%= link_to "Sign up", new_signup_path, class: "hover:text-blue-700 transition-colors" %>
             <% end %>
           </div>
         </div>

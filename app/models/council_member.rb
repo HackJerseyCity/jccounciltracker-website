@@ -1,4 +1,5 @@
 class CouncilMember < ApplicationRecord
+  include Starrable
   has_many :votes, dependent: :destroy
   has_many :voted_agenda_items, through: :votes, source: :agenda_item
 

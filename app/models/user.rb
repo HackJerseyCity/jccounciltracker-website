@@ -1,6 +1,11 @@
 class User < ApplicationRecord
   has_secure_password
   has_many :sessions, dependent: :destroy
+  has_many :stars, dependent: :destroy
+
+  def starred?(item)
+    stars.exists?(starrable: item)
+  end
 
   enum :role, { user: 0, content_admin: 1, site_admin: 2 }
 

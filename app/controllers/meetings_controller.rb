@@ -14,5 +14,11 @@ class MeetingsController < ApplicationController
       @meeting.current_published_version
     end
     @agenda_sections = @agenda_version&.agenda_sections || AgendaSection.none
+
+    if Current.user
+      agenda_item_ids = @agenda_sections.flat_map { |s| s.agenda_items.map(&:id) }
+      @starred_item_ids = Current.user.stars.where(starrable_type: "AgendaItem", starrable_id: agenda_item_ids).pluck(:starrable_id).to_set
+      @starred_meeting = Current.user.stars.exists?(starrable: @meeting)
+    end
   end
 end

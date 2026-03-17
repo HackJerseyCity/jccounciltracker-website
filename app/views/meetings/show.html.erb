@@ -5,7 +5,10 @@
   </nav>
 
   <div class="flex items-center justify-between">
-    <h1 class="text-3xl font-bold text-gray-900"><%= @meeting.display_name %></h1>
+    <div class="flex items-center gap-2">
+      <h1 class="text-3xl font-bold text-gray-900"><%= @meeting.display_name %></h1>
+      <%= star_button(@meeting, starred: @starred_meeting) %>
+    </div>
     <% if authenticated? && Current.user&.admin? %>
       <%= link_to "Upload agenda", new_admin_meeting_path, class: "inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors" %>
     <% end %>
@@ -53,6 +56,7 @@
               <li class="px-6 py-4">
                 <div class="flex items-start gap-3">
                   <span class="text-sm font-medium text-gray-400 whitespace-nowrap mt-0.5"><%= item.item_number %></span>
+                  <%= star_button(item, starred: @starred_item_ids&.include?(item.id)) %>
                   <div class="flex-1 min-w-0">
                     <% if item.url.present? %>
                       <p class="text-sm"><%= link_to item.title, item.url, target: "_blank", rel: "noopener noreferrer", class: "text-blue-700 hover:text-blue-900 hover:underline" %></p>

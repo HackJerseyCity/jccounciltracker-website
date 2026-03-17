@@ -1,4 +1,5 @@
 class Meeting < ApplicationRecord
+  include Starrable
   has_many :agenda_versions, -> { order(:version_number) }, dependent: :destroy
 
   enum :meeting_type, {

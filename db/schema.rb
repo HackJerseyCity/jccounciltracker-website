@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_17_120646) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_17_145722) do
   create_table "agenda_item_tags", force: :cascade do |t|
     t.integer "agenda_item_id", null: false
     t.datetime "created_at", null: false
@@ -104,6 +104,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_17_120646) do
     t.index ["user_id"], name: "index_sessions_on_user_id"
   end
 
+  create_table "stars", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.integer "starrable_id", null: false
+    t.string "starrable_type", null: false
+    t.datetime "updated_at", null: false
+    t.integer "user_id", null: false
+    t.index ["starrable_type", "starrable_id"], name: "index_stars_on_starrable"
+    t.index ["user_id", "starrable_type", "starrable_id"], name: "index_stars_on_user_id_and_starrable_type_and_starrable_id", unique: true
+    t.index ["user_id"], name: "index_stars_on_user_id"
+  end
+
   create_table "tags", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "name", null: false
@@ -142,6 +153,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_17_120646) do
   add_foreign_key "invitations", "users", column: "accepted_by_id"
   add_foreign_key "invitations", "users", column: "invited_by_id"
   add_foreign_key "sessions", "users"
+  add_foreign_key "stars", "users"
   add_foreign_key "votes", "agenda_items"
   add_foreign_key "votes", "council_members"
 end

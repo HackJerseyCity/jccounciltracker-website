@@ -2,6 +2,7 @@ Rails.application.routes.draw do
   resource :session
   resources :passwords, param: :token
   resource :registration, only: [ :new, :create ]
+  resource :signup, only: [ :new, :create ]
   resource :profile, only: [ :edit, :update ]
 
   namespace :admin do
@@ -23,6 +24,7 @@ Rails.application.routes.draw do
   end
 
   get "dashboard", to: "dashboard#show", as: :dashboard
+  resources :stars, only: [ :index, :create, :destroy ]
 
   resources :meetings, only: [ :index, :show ]
   resources :council_members, only: [ :index, :show ]
