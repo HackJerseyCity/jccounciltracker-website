@@ -22,7 +22,7 @@
 
   <body class="h-full flex flex-col bg-gray-50 text-gray-900 antialiased">
     <header class="bg-white border-b border-gray-200">
-      <nav class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <nav class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8" data-controller="mobile-menu">
         <div class="flex items-center justify-between h-16">
           <div class="flex items-center gap-2">
             <%= link_to root_path, class: "flex items-center gap-2 text-gray-900 hover:text-blue-700 transition-colors" do %>
@@ -46,6 +46,30 @@
               <%= button_to "Sign out", session_path, method: :delete, class: "hover:text-blue-700 transition-colors cursor-pointer" %>
             <% else %>
               <%= link_to "Sign in", new_session_path, class: "hover:text-blue-700 transition-colors" %>
+            <% end %>
+          </div>
+
+          <button class="sm:hidden p-2 -mr-2 text-gray-600 hover:text-gray-900" data-action="mobile-menu#toggle" aria-label="Toggle menu">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+            </svg>
+          </button>
+        </div>
+
+        <div class="hidden sm:hidden border-t border-gray-200 py-3" data-mobile-menu-target="menu">
+          <div class="flex flex-col gap-3 text-sm font-medium text-gray-600">
+            <%= link_to "Meetings", meetings_path, class: "hover:text-blue-700 transition-colors", data: { action: "mobile-menu#close" } %>
+            <%= link_to "Council Members", council_members_path, class: "hover:text-blue-700 transition-colors", data: { action: "mobile-menu#close" } %>
+            <%= link_to "Topics", tags_path, class: "hover:text-blue-700 transition-colors", data: { action: "mobile-menu#close" } %>
+            <%= link_to "Search", search_path, class: "hover:text-blue-700 transition-colors", data: { action: "mobile-menu#close" } %>
+            <% if authenticated? %>
+              <% if Current.session&.user&.admin? %>
+                <%= link_to "Admin", admin_dashboard_path, class: "hover:text-blue-700 transition-colors", data: { action: "mobile-menu#close" } %>
+              <% end %>
+              <%= link_to "Profile", edit_profile_path, class: "hover:text-blue-700 transition-colors", data: { action: "mobile-menu#close" } %>
+              <%= button_to "Sign out", session_path, method: :delete, class: "hover:text-blue-700 transition-colors cursor-pointer" %>
+            <% else %>
+              <%= link_to "Sign in", new_session_path, class: "hover:text-blue-700 transition-colors", data: { action: "mobile-menu#close" } %>
             <% end %>
           </div>
         </div>
