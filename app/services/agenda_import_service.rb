@@ -70,6 +70,10 @@ class AgendaImportService
 
   def build_sections_and_items
     @data["sections"].each do |section_data|
+      unless AgendaSection.section_types.key?(section_data["type"])
+        next
+      end
+
       section = @agenda_version.agenda_sections.build(
         number: section_data["number"],
         title: section_data["title"],

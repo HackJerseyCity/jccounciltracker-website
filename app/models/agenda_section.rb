@@ -7,15 +7,10 @@ class AgendaSection < ApplicationRecord
   enum :section_type, {
     ordinance_first_reading: "ordinance_first_reading",
     ordinance_second_reading: "ordinance_second_reading",
-    resolutions: "resolutions",
+    public_request_for_hearing: "public_request_for_hearing",
     petitions_communications: "petitions_communications",
     reports_of_directors: "reports_of_directors",
-    claims: "claims",
-    regular_meeting: "regular_meeting",
-    reception_bid: "reception_bid",
-    deferred: "deferred",
-    adjournment: "adjournment",
-    other: "other"
+    resolutions: "resolutions"
   }
 
   validates :number, presence: true

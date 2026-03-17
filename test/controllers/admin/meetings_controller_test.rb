@@ -102,7 +102,7 @@ class Admin::MeetingsControllerTest < ActionDispatch::IntegrationTest
       meeting: { type: "regular", date: "2026-02-25" },
       agenda_pages: 12,
       sections: [
-        { number: 1, title: "UPDATED SECTION", type: "regular_meeting", items: [] }
+        { number: 1, title: "ORDINANCE - FIRST READING", type: "ordinance_first_reading", items: [] }
       ]
     }.to_json
 

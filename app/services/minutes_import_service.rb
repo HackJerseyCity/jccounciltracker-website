@@ -81,7 +81,13 @@ class MinutesImportService
   end
 
   def import_items!
-    agenda_items_by_number = @meeting.agenda_items.index_by(&:item_number)
+    version = @meeting.current_published_version || @meeting.current_version
+    unless version
+      @errors << "No agenda version found for this meeting"
+      return
+    end
+
+    agenda_items_by_number = version.agenda_items.index_by(&:item_number)
 
     @data["items"].each do |item_data|
       item_number = item_data["item_number"]

@@ -7,12 +7,6 @@ class AgendaImportServiceTest < ActiveSupport::TestCase
       "agenda_pages" => 5,
       "sections" => [
         {
-          "number" => 1,
-          "title" => "REGULAR MEETING",
-          "type" => "regular_meeting",
-          "items" => []
-        },
-        {
           "number" => 2,
           "title" => "ORDINANCE - FIRST READING",
           "type" => "ordinance_first_reading",
@@ -64,8 +58,8 @@ class AgendaImportServiceTest < ActiveSupport::TestCase
       "sections" => [
         {
           "number" => 1,
-          "title" => "UPDATED SECTION",
-          "type" => "regular_meeting",
+          "title" => "ORDINANCE - FIRST READING",
+          "type" => "ordinance_first_reading",
           "items" => []
         }
       ]
@@ -85,7 +79,7 @@ class AgendaImportServiceTest < ActiveSupport::TestCase
     assert_equal Date.new(2026, 3, 15), service.meeting.date
     assert_equal 5, service.agenda_version.agenda_pages
     assert_equal 1, service.agenda_version.version_number
-    assert_equal 3, service.agenda_version.agenda_sections.count
+    assert_equal 2, service.agenda_version.agenda_sections.count
     assert_equal 3, service.agenda_version.agenda_items.count
   end
 
@@ -139,7 +133,7 @@ class AgendaImportServiceTest < ActiveSupport::TestCase
 
     data = existing_meeting_data
     # Add a section with missing required fields to cause failure
-    data["sections"] << { "number" => nil, "title" => nil, "type" => nil, "items" => [] }
+    data["sections"] << { "number" => nil, "title" => nil, "type" => "resolutions", "items" => [] }
 
     service = AgendaImportService.new(data).call
 
@@ -151,13 +145,25 @@ class AgendaImportServiceTest < ActiveSupport::TestCase
   test "handles empty sections" do
     data = valid_data
     data["sections"] = [
-      { "number" => 1, "title" => "EMPTY SECTION", "type" => "adjournment", "items" => [] }
+      { "number" => 1, "title" => "PETITIONS AND COMMUNICATIONS", "type" => "petitions_communications", "items" => [] }
     ]
 
     service = AgendaImportService.new(data).call
     assert service.success?
     assert_equal 1, service.agenda_version.agenda_sections.count
     assert_equal 0, service.agenda_version.agenda_items.count
+  end
+
+  test "skips unrecognized section types" do
+    data = valid_data
+    data["sections"].unshift(
+      { "number" => 1, "title" => "REGULAR MEETING", "type" => "regular_meeting", "items" => [] }
+    )
+
+    service = AgendaImportService.new(data).call
+    assert service.success?
+    assert_equal 2, service.agenda_version.agenda_sections.count
+    assert_nil service.agenda_version.agenda_sections.find_by(title: "REGULAR MEETING")
   end
 
   test "sets position correctly from array index" do

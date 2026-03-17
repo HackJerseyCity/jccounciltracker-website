@@ -144,6 +144,18 @@ class MinutesImportServiceTest < ActiveSupport::TestCase
     assert_equal "nay", item.votes.find_by(council_member: council_members(:lavarro)).position
   end
 
+  test "imports against draft agenda when no published version exists" do
+    # Unpublish the agenda version so only draft exists
+    agenda_versions(:regular_meeting_v1).update!(status: :draft)
+
+    service = MinutesImportService.new(valid_minutes_data).call
+    assert service.success?
+
+    item = agenda_items(:ordinance_with_details).reload
+    assert_equal "approved", item.result
+    assert_equal 2, item.votes.count
+  end
+
   test "invalid JSON structure returns error" do
     service = MinutesImportService.new("not a hash").call
     assert_not service.success?
