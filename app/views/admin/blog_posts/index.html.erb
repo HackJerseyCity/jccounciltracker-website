@@ -1,0 +1,47 @@
+<div class="flex items-center justify-between mb-6">
+  <h1 class="text-2xl font-bold text-gray-900">Blog Posts</h1>
+  <%= link_to "New post", new_admin_blog_post_path, class: "inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors" %>
+</div>
+
+<% if @blog_posts.any? %>
+  <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+    <table class="min-w-full divide-y divide-gray-200">
+      <thead class="bg-gray-50">
+        <tr>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Title</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Author</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+          <th class="px-6 py-3"></th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-200">
+        <% @blog_posts.each do |post| %>
+          <tr>
+            <td class="px-6 py-4 text-sm font-medium text-gray-900">
+              <%= link_to post.title, admin_blog_post_path(post), class: "text-blue-600 hover:text-blue-800" %>
+            </td>
+            <td class="px-6 py-4 text-sm text-gray-500"><%= post.author.name %></td>
+            <td class="px-6 py-4 text-sm">
+              <% if post.published? %>
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">Published</span>
+              <% else %>
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">Draft</span>
+              <% end %>
+            </td>
+            <td class="px-6 py-4 text-sm text-gray-500">
+              <%= post.published? ? post.published_at.strftime("%b %-d, %Y") : post.created_at.strftime("%b %-d, %Y") %>
+            </td>
+            <td class="px-6 py-4 text-sm text-right">
+              <%= link_to "Edit", edit_admin_blog_post_path(post), class: "text-blue-600 hover:text-blue-800" %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+<% else %>
+  <div class="bg-white rounded-lg border border-gray-200 p-12 text-center">
+    <p class="text-gray-500">No blog posts yet.</p>
+  </div>
+<% end %>

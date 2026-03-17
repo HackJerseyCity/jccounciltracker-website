@@ -1,73 +1,96 @@
-<div class="flex items-center justify-between mb-6">
-  <div class="flex items-center gap-3">
-    <h1 class="text-2xl font-bold text-gray-900"><%= @meeting.display_name %></h1>
-    <% if @agenda_version %>
-      <% if @agenda_version.published? %>
-        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Published</span>
-      <% else %>
-        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">Draft</span>
-      <% end %>
-    <% end %>
-    <% if @meeting.minutes_imported? %>
-      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Minutes imported</span>
-    <% end %>
+<%# Header %>
+<div class="mb-8">
+  <div class="flex items-center gap-2 text-sm text-gray-500 mb-3">
+    <%= link_to "Meetings", admin_meetings_path, class: "hover:text-blue-600" %>
+    <span>/</span>
+    <span class="text-gray-900"><%= @meeting.date.strftime("%B %-d, %Y") %></span>
   </div>
-  <div class="flex items-center gap-3">
-    <%= link_to "Back", admin_meetings_path, class: "text-sm text-gray-600 hover:text-gray-800" %>
-    <%= form_with url: import_minutes_admin_meeting_path(@meeting), method: :post, multipart: true, class: "flex items-center gap-2" do %>
-      <input type="file" name="minutes_file" accept=".json" class="text-sm text-gray-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 file:cursor-pointer" />
-      <button type="submit" class="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors cursor-pointer">Import Minutes</button>
-    <% end %>
-    <% if @agenda_version %>
-      <% if @agenda_version.draft? %>
-        <%= button_to "Publish", publish_admin_meeting_path(@meeting, version_id: @agenda_version.id), method: :post, class: "inline-flex items-center px-3 py-1.5 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors cursor-pointer" %>
-      <% else %>
-        <%= button_to "Unpublish", publish_admin_meeting_path(@meeting, version_id: @agenda_version.id), method: :post, class: "inline-flex items-center px-3 py-1.5 bg-yellow-600 text-white text-sm font-medium rounded-lg hover:bg-yellow-700 transition-colors cursor-pointer", data: { turbo_confirm: "Are you sure you want to unpublish this version? It will no longer be visible to the public." } %>
+
+  <div class="flex items-start justify-between">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900"><%= @meeting.display_name %></h1>
+      <div class="mt-2 flex items-center gap-2">
+        <% if @agenda_version %>
+          <% if @agenda_version.published? %>
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 ring-1 ring-emerald-600/10">Published</span>
+          <% else %>
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700 ring-1 ring-amber-600/10">Draft</span>
+          <% end %>
+        <% end %>
+        <% if @meeting.minutes_imported? %>
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 ring-1 ring-emerald-600/10">Minutes imported</span>
+        <% end %>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <% if @agenda_version %>
+        <% if @agenda_version.draft? %>
+          <%= button_to "Publish", publish_admin_meeting_path(@meeting, version_id: @agenda_version.id), method: :post, class: "px-3.5 py-2 text-sm font-medium text-emerald-700 bg-emerald-50 rounded-lg hover:bg-emerald-100 ring-1 ring-emerald-600/10 transition-colors cursor-pointer" %>
+        <% else %>
+          <%= button_to "Unpublish", publish_admin_meeting_path(@meeting, version_id: @agenda_version.id), method: :post, class: "px-3.5 py-2 text-sm font-medium text-amber-700 bg-amber-50 rounded-lg hover:bg-amber-100 ring-1 ring-amber-600/10 transition-colors cursor-pointer", data: { turbo_confirm: "Are you sure you want to unpublish this version? It will no longer be visible to the public." } %>
+        <% end %>
       <% end %>
-    <% end %>
-    <% if @meeting.minutes_imported? %>
-      <%= button_to "Delete Minutes", delete_minutes_admin_meeting_path(@meeting), method: :delete, class: "inline-flex items-center px-3 py-1.5 bg-yellow-600 text-white text-sm font-medium rounded-lg hover:bg-yellow-700 transition-colors cursor-pointer", data: { turbo_confirm: "Are you sure you want to delete minutes data? This will remove all vote records for this meeting." } %>
-    <% end %>
-    <%= button_to "Delete Meeting", admin_meeting_path(@meeting), method: :delete, class: "inline-flex items-center px-3 py-1.5 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition-colors cursor-pointer", data: { turbo_confirm: "Are you sure you want to delete this meeting?" } %>
+      <% if @meeting.minutes_imported? %>
+        <%= button_to "Delete Minutes", delete_minutes_admin_meeting_path(@meeting), method: :delete, class: "px-3.5 py-2 text-sm font-medium text-amber-700 bg-amber-50 rounded-lg hover:bg-amber-100 ring-1 ring-amber-600/10 transition-colors cursor-pointer", data: { turbo_confirm: "Are you sure you want to delete minutes data? This will remove all vote records for this meeting." } %>
+      <% end %>
+      <%= button_to "Delete Meeting", admin_meeting_path(@meeting), method: :delete, class: "px-3.5 py-2 text-sm font-medium text-red-600 bg-red-50 rounded-lg hover:bg-red-100 ring-1 ring-red-600/10 transition-colors cursor-pointer", data: { turbo_confirm: "Are you sure you want to delete this meeting?" } %>
+    </div>
   </div>
 </div>
 
-<% if @meeting.agenda_versions.size > 1 %>
-  <div class="mb-6">
+<%# Version selector and import %>
+<div class="flex items-center justify-between mb-8">
+  <% if @meeting.agenda_versions.size > 1 %>
     <%= form_with url: admin_meeting_path(@meeting), method: :get, local: true, class: "flex items-center gap-3" do %>
-      <label for="version" class="text-sm font-medium text-gray-700">Agenda version:</label>
-      <select name="version" id="version" onchange="this.form.requestSubmit()" class="block rounded-md border-gray-300 shadow-sm text-sm focus:border-blue-500 focus:ring-blue-500">
+      <label for="version" class="text-sm font-medium text-gray-600">Version:</label>
+      <select name="version" id="version" onchange="this.form.requestSubmit()" class="rounded-lg border-gray-300 shadow-sm text-sm focus:border-blue-500 focus:ring-blue-500">
         <% @meeting.agenda_versions.each do |v| %>
           <option value="<%= v.version_number %>" <%= "selected" if v == @agenda_version %>><%= v.display_label %> [<%= v.status.capitalize %>]</option>
         <% end %>
       </select>
     <% end %>
-  </div>
-<% end %>
+  <% else %>
+    <div></div>
+  <% end %>
 
+  <%= form_with url: import_minutes_admin_meeting_path(@meeting), method: :post, multipart: true, class: "flex items-center gap-3" do %>
+    <input type="file" name="minutes_file" accept=".json" class="text-sm text-gray-500 file:mr-2 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 file:cursor-pointer file:transition-colors" />
+    <button type="submit" class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors cursor-pointer">Import Minutes</button>
+  <% end %>
+</div>
+
+<%# Stats %>
 <div class="grid grid-cols-3 gap-4 mb-8">
-  <div class="bg-white rounded-lg border border-gray-200 p-4">
+  <div class="bg-white rounded-lg border border-gray-200 p-5">
     <p class="text-2xl font-bold text-gray-900"><%= @agenda_version&.agenda_pages || "N/A" %></p>
-    <p class="text-sm text-gray-500">Agenda pages</p>
+    <p class="text-sm text-gray-500 mt-1">Agenda pages</p>
   </div>
-  <div class="bg-white rounded-lg border border-gray-200 p-4">
+  <div class="bg-white rounded-lg border border-gray-200 p-5">
     <p class="text-2xl font-bold text-gray-900"><%= @agenda_sections.size %></p>
-    <p class="text-sm text-gray-500">Sections</p>
+    <p class="text-sm text-gray-500 mt-1">Sections</p>
   </div>
-  <div class="bg-white rounded-lg border border-gray-200 p-4">
+  <div class="bg-white rounded-lg border border-gray-200 p-5">
     <p class="text-2xl font-bold text-gray-900"><%= @agenda_sections.sum { |s| s.agenda_items.size } %></p>
-    <p class="text-sm text-gray-500">Agenda items</p>
+    <p class="text-sm text-gray-500 mt-1">Agenda items</p>
   </div>
 </div>
 
+<%# Sections %>
 <div class="space-y-6">
   <% @agenda_sections.each do |section| %>
-    <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
-      <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
-        <h2 class="font-semibold text-gray-900"><%= section.number %>. <%= section.title %></h2>
-        <span class="text-xs text-gray-500"><%= section.section_type.titleize %> &middot; <%= section.agenda_items.size %> items</span>
-      </div>
+    <div class="bg-white rounded-lg border border-gray-200 overflow-hidden" data-controller="collapsible" data-collapsible-key-value="meeting-<%= @meeting.id %>-section-<%= section.id %>">
+      <button type="button" data-action="click->collapsible#toggle" class="w-full px-6 py-4 bg-gray-50 border-b border-gray-200 flex items-center justify-between cursor-pointer hover:bg-gray-100 transition-colors text-left">
+        <div>
+          <h2 class="font-semibold text-gray-900"><%= section.number %>. <%= section.title %></h2>
+          <span class="text-xs text-gray-500"><%= section.section_type.titleize %> &middot; <%= section.agenda_items.size %> items</span>
+        </div>
+        <svg data-collapsible-target="icon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+        </svg>
+      </button>
 
+      <div data-collapsible-target="content">
       <% if section.agenda_items.any? %>
         <table class="min-w-full divide-y divide-gray-200">
           <thead class="bg-gray-50">
@@ -103,7 +126,7 @@
                 </td>
                 <td class="px-6 py-3 whitespace-nowrap text-sm">
                   <% if item.result.present? %>
-                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800"><%= item.result.titleize %></span>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-50 text-blue-700"><%= item.result.titleize %></span>
                     <% if item.vote_tally.present? %>
                       <span class="text-gray-500 ml-1">(<%= item.vote_tally %>)</span>
                     <% end %>
@@ -117,6 +140,7 @@
           </tbody>
         </table>
       <% end %>
+      </div>
     </div>
   <% end %>
 </div>

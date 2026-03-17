@@ -21,6 +21,9 @@ Rails.application.routes.draw do
     resources :agenda_item_tags, only: [ :create, :destroy ] do
       post :copy, on: :collection
     end
+    resources :blog_posts do
+      post :publish, on: :member
+    end
   end
 
   get "dashboard", to: "dashboard#show", as: :dashboard
@@ -29,6 +32,7 @@ Rails.application.routes.draw do
   resources :meetings, only: [ :index, :show ]
   resources :council_members, only: [ :index, :show ]
   resources :tags, only: [ :index, :show ], path: "topics"
+  resources :blog_posts, only: [ :index, :show ], path: "blog"
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
   # Can be used by load balancers and uptime monitors to verify that the app is live.

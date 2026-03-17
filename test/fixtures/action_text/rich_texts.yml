@@ -1,0 +1,9 @@
+published_post_body:
+  record: published_post (BlogPost)
+  name: body
+  body: <p>We are excited to launch CouncilTracker for Jersey City residents.</p>
+
+draft_post_body:
+  record: draft_post (BlogPost)
+  name: body
+  body: <p>We have some exciting features planned for the next release.</p>

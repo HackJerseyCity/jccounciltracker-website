@@ -1,0 +1,10 @@
+published_post:
+  title: Welcome to CouncilTracker
+  slug: welcome-to-counciltracker
+  published_at: <%= 1.day.ago %>
+  user: content_admin
+
+draft_post:
+  title: Upcoming Features
+  slug: upcoming-features
+  user: site_admin

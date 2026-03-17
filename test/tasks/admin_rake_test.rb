@@ -9,6 +9,8 @@ class AdminRakeTest < ActiveSupport::TestCase
   test "generate_site_admin creates a site admin" do
     Invitation.where(invited_by: User.site_admin).delete_all
     Session.where(user: User.site_admin).delete_all
+    BlogPost.where(user: User.site_admin).delete_all
+    Star.where(user: User.site_admin).delete_all
     User.where(role: :site_admin).delete_all
 
     assert_difference "User.site_admin.count", 1 do
