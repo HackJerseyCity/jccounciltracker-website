@@ -28,7 +28,7 @@
               </button>
             </td>
             <td class="px-6 py-4">
-              <span class="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium bg-purple-100 text-purple-700"><%= invitation.role.humanize %></span>
+              <span class="inline-flex items-center rounded px-2 py-1 text-xs font-medium bg-purple-100 text-purple-700"><%= invitation.role.humanize %></span>
             </td>
             <td class="px-6 py-4 text-sm text-gray-700"><%= invitation.invited_by.name %></td>
             <td class="px-6 py-4 text-sm text-gray-500"><%= time_ago_in_words(invitation.expires_at) %></td>
@@ -59,7 +59,7 @@
           <tr>
             <td class="px-6 py-4 text-sm text-gray-700"><%= invitation.accepted_by&.name %></td>
             <td class="px-6 py-4">
-              <span class="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium bg-green-100 text-green-700"><%= invitation.role.humanize %></span>
+              <span class="inline-flex items-center rounded px-2 py-1 text-xs font-medium bg-green-100 text-green-700"><%= invitation.role.humanize %></span>
             </td>
             <td class="px-6 py-4 text-sm text-gray-700"><%= invitation.invited_by.name %></td>
             <td class="px-6 py-4 text-sm text-gray-500"><%= invitation.accepted_at.strftime("%b %d, %Y") %></td>

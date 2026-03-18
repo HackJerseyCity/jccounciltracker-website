@@ -5,7 +5,7 @@
      data-tag-typeahead-agenda-item-id-value="<%= agenda_item.id %>"
      class="flex flex-wrap items-center gap-1.5 sm:gap-1.5">
   <% agenda_item.tags.alphabetical.each do |tag| %>
-    <span class="inline-flex items-center gap-0.5 px-2 py-1 sm:py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+    <span class="inline-flex items-center gap-0.5 px-2 py-1 sm:py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-800">
       <%= tag.name %>
       <%= button_to admin_agenda_item_tag_path(agenda_item.agenda_item_tags.find_by(tag: tag), agenda_item_id: agenda_item.id),
             method: :delete,

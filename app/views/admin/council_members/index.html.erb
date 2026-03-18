@@ -20,7 +20,7 @@
           <tr>
             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"><%= member.full_name %></td>
             <td class="px-6 py-4 whitespace-nowrap">
-              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
                 <%= member.seat_label %>
               </span>
             </td>
@@ -28,7 +28,7 @@
               <%= member.term_start.strftime("%b %Y") %> &ndash; <%= member.term_end&.strftime("%b %Y") || "Present" %>
             </td>
             <td class="px-6 py-4 whitespace-nowrap">
-              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Current</span>
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">Current</span>
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-right text-sm">
               <%= link_to "Edit", edit_admin_council_member_path(member), class: "text-blue-600 hover:text-blue-800 font-medium" %>
@@ -40,7 +40,7 @@
           <tr>
             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"><%= member.full_name %></td>
             <td class="px-6 py-4 whitespace-nowrap">
-              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
                 <%= member.seat_label %>
               </span>
             </td>
@@ -48,7 +48,7 @@
               <%= member.term_start.strftime("%b %Y") %> &ndash; <%= member.term_end&.strftime("%b %Y") || "Present" %>
             </td>
             <td class="px-6 py-4 whitespace-nowrap">
-              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">Past</span>
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">Past</span>
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-right text-sm">
               <%= link_to "Edit", edit_admin_council_member_path(member), class: "text-blue-600 hover:text-blue-800 font-medium" %>

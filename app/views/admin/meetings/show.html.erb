@@ -12,13 +12,13 @@
       <div class="mt-2 flex items-center gap-2 flex-wrap">
         <% if @agenda_version %>
           <% if @agenda_version.published? %>
-            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 ring-1 ring-emerald-600/10">Published</span>
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium bg-emerald-50 text-emerald-700 ring-1 ring-emerald-600/10">Published</span>
           <% else %>
-            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700 ring-1 ring-amber-600/10">Draft</span>
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium bg-amber-50 text-amber-700 ring-1 ring-amber-600/10">Draft</span>
           <% end %>
         <% end %>
         <% if @meeting.minutes_imported? %>
-          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 ring-1 ring-emerald-600/10">Minutes imported</span>
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium bg-emerald-50 text-emerald-700 ring-1 ring-emerald-600/10">Minutes imported</span>
         <% end %>
       </div>
     </div>

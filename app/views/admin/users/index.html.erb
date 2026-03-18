@@ -21,7 +21,7 @@
               when "content_admin" then "bg-purple-100 text-purple-700"
               else "bg-gray-100 text-gray-700"
             end %>
-            <span class="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium <%= badge_class %>"><%= user.role.humanize %></span>
+            <span class="inline-flex items-center rounded px-2 py-1 text-xs font-medium <%= badge_class %>"><%= user.role.humanize %></span>
           </td>
           <td class="px-6 py-4 text-sm text-gray-500"><%= user.created_at.strftime("%b %d, %Y") %></td>
         </tr>
