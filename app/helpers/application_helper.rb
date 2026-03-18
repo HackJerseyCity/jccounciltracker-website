@@ -57,6 +57,17 @@ module ApplicationHelper
     end
   end
 
+  def bottom_nav_link(label, path, icon_name)
+    active = current_sidebar_item == icon_name
+    base_classes = "flex flex-col items-center justify-center gap-0.5 flex-1 py-1 text-[10px] font-medium transition-colors"
+    active_classes = active ? "text-blue-700" : "text-gray-500"
+
+    link_to path, class: "#{base_classes} #{active_classes}" do
+      concat(sidebar_icon(icon_name, active))
+      concat(content_tag(:span, label))
+    end
+  end
+
   def star_button(starrable, starred: nil)
     return unless authenticated?
 
