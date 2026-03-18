@@ -162,7 +162,7 @@ class Admin::MeetingsControllerTest < ActionDispatch::IntegrationTest
 
     post import_minutes_admin_meeting_path(meeting)
     assert_redirected_to admin_meeting_path(meeting)
-    assert_equal "Please select a JSON file to upload.", flash[:alert]
+    assert_equal "Please select a file to upload.", flash[:alert]
   end
 
   test "import_minutes with invalid JSON" do

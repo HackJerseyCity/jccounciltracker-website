@@ -19,11 +19,13 @@ module Admin
 
     def create
       unless params[:agenda_file].present?
-        flash.now[:alert] = "Please select a JSON file to upload."
+        flash.now[:alert] = "Please select a file to upload."
         return render :new, status: :unprocessable_entity
       end
 
-      data = JSON.parse(params[:agenda_file].read)
+      data = parse_agenda_upload(params[:agenda_file])
+      return render :new, status: :unprocessable_entity unless data
+
       service = AgendaImportService.new(data).call
 
       if service.success?
@@ -37,20 +39,22 @@ module Admin
         flash.now[:alert] = service.errors.join(", ")
         render :new, status: :unprocessable_entity
       end
-    rescue JSON::ParserError
-      flash.now[:alert] = "Invalid JSON file."
-      render :new, status: :unprocessable_entity
     end
 
     def import_minutes
       @meeting = Meeting.find(params[:id])
 
       unless params[:minutes_file].present?
-        redirect_to admin_meeting_path(@meeting), alert: "Please select a JSON file to upload."
+        redirect_to admin_meeting_path(@meeting), alert: "Please select a file to upload."
         return
       end
 
-      data = JSON.parse(params[:minutes_file].read)
+      data = parse_minutes_upload(params[:minutes_file])
+      unless data
+        redirect_to admin_meeting_path(@meeting), alert: @parse_error
+        return
+      end
+
       service = MinutesImportService.new(data).call
 
       if service.success?
@@ -60,8 +64,6 @@ module Admin
       else
         redirect_to admin_meeting_path(@meeting), alert: service.errors.join(", ")
       end
-    rescue JSON::ParserError
-      redirect_to admin_meeting_path(@meeting), alert: "Invalid JSON file."
     end
 
     def delete_minutes
@@ -93,6 +95,47 @@ module Admin
       @meeting = Meeting.find(params[:id])
       @meeting.destroy!
       redirect_to admin_meetings_path, notice: "Meeting deleted."
+    end
+
+    private
+
+    def parse_agenda_upload(file)
+      if pdf_file?(file)
+        parser = AgendaPdfParserService.new(file.tempfile)
+        data = parser.call
+        unless parser.success?
+          flash.now[:alert] = parser.errors.join(", ")
+          return nil
+        end
+        data
+      else
+        JSON.parse(file.read)
+      end
+    rescue JSON::ParserError
+      flash.now[:alert] = "Invalid JSON file."
+      nil
+    end
+
+    def parse_minutes_upload(file)
+      if pdf_file?(file)
+        parser = MinutesPdfParserService.new(file.tempfile)
+        data = parser.call
+        unless parser.success?
+          @parse_error = parser.errors.join(", ")
+          return nil
+        end
+        data
+      else
+        JSON.parse(file.read)
+      end
+    rescue JSON::ParserError
+      @parse_error = "Invalid JSON file."
+      nil
+    end
+
+    def pdf_file?(file)
+      file.content_type == "application/pdf" ||
+        file.original_filename&.end_with?(".pdf")
     end
   end
 end
