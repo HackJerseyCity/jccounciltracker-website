@@ -46,6 +46,44 @@ class Admin::TagsControllerTest < ActionDispatch::IntegrationTest
     assert_equal [], json
   end
 
+  # --- index ---
+
+  test "index requires authentication" do
+    get admin_tags_path
+    assert_redirected_to new_session_path
+  end
+
+  test "index shows all tags with item counts" do
+    sign_in_as(users(:content_admin))
+    get admin_tags_path
+    assert_response :success
+    assert_select "table"
+  end
+
+  test "index filters by search query" do
+    sign_in_as(users(:content_admin))
+    get admin_tags_path(q: "bud")
+    assert_response :success
+    assert_select "span.bg-indigo-100", text: "Budget"
+  end
+
+  # --- destroy ---
+
+  test "destroy requires authentication" do
+    assert_no_difference("Tag.count") do
+      delete admin_tag_path(tags(:housing))
+    end
+    assert_redirected_to new_session_path
+  end
+
+  test "destroy deletes a tag" do
+    sign_in_as(users(:content_admin))
+    assert_difference("Tag.count", -1) do
+      delete admin_tag_path(tags(:housing))
+    end
+    assert_redirected_to admin_tags_path
+  end
+
   test "search limits results to 10" do
     sign_in_as(users(:content_admin))
     15.times { |i| Tag.create!(name: "Test Tag #{i}") }

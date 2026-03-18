@@ -1,0 +1,60 @@
+<div class="mb-6 sm:mb-8">
+  <h1 class="text-xl sm:text-2xl font-bold text-gray-900">Tags</h1>
+  <p class="mt-1 text-sm text-gray-500">Manage tags across all agenda items. Tags with 0 items can be safely removed.</p>
+</div>
+
+<%= form_with url: admin_tags_path, method: :get, local: true, class: "mb-6" do %>
+  <div class="flex gap-2">
+    <input type="text" name="q" value="<%= params[:q] %>" placeholder="Search tags..."
+           class="flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500"
+           autocomplete="off" />
+    <button type="submit" class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors cursor-pointer">Search</button>
+    <% if params[:q].present? %>
+      <%= link_to "Clear", admin_tags_path, class: "px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors" %>
+    <% end %>
+  </div>
+<% end %>
+
+<div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+  <table class="min-w-full divide-y divide-gray-200">
+    <thead class="bg-gray-50">
+      <tr>
+        <th class="px-4 py-3 sm:px-6 text-left text-xs font-medium text-gray-500 uppercase">Tag</th>
+        <th class="px-4 py-3 sm:px-6 text-left text-xs font-medium text-gray-500 uppercase">Items</th>
+        <th class="px-4 py-3 sm:px-6 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-gray-200">
+      <% @tags.each do |tag| %>
+        <tr class="<%= "bg-red-50/50" if tag.items_count == 0 %>">
+          <td class="px-4 py-3 sm:px-6 text-sm text-gray-900">
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-800"><%= tag.name %></span>
+          </td>
+          <td class="px-4 py-3 sm:px-6 text-sm">
+            <% if tag.items_count == 0 %>
+              <span class="text-red-600 font-medium">0 items</span>
+            <% else %>
+              <span class="text-gray-600"><%= tag.items_count %> <%= "item".pluralize(tag.items_count) %></span>
+            <% end %>
+          </td>
+          <td class="px-4 py-3 sm:px-6 text-right text-sm">
+            <%= button_to "Delete", admin_tag_path(tag, q: params[:q]),
+                  method: :delete,
+                  class: "text-red-600 hover:text-red-800 font-medium cursor-pointer",
+                  data: { turbo_confirm: "Delete tag \"#{tag.name}\"? This will remove it from #{tag.items_count} item#{"s" unless tag.items_count == 1}." } %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+
+  <% if @tags.empty? %>
+    <div class="px-6 py-12 text-center text-sm text-gray-500">
+      <% if params[:q].present? %>
+        No tags matching "<%= params[:q] %>".
+      <% else %>
+        No tags yet.
+      <% end %>
+    </div>
+  <% end %>
+</div>
