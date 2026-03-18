@@ -73,7 +73,7 @@ export default class extends Controller {
     tags.forEach(tag => {
       const li = document.createElement("li")
       li.textContent = tag.name
-      li.className = "px-3 py-1.5 cursor-pointer hover:bg-indigo-50"
+      li.className = "px-3 py-2.5 sm:py-1.5 cursor-pointer hover:bg-indigo-50"
       li.addEventListener("click", () => this.selectTag(tag.name))
       this.dropdownTarget.appendChild(li)
     })
@@ -81,7 +81,7 @@ export default class extends Controller {
     if (!exactMatch && query.length > 0) {
       const li = document.createElement("li")
       li.innerHTML = `Create <em>${this.escapeHtml(query)}</em>`
-      li.className = "px-3 py-1.5 cursor-pointer hover:bg-indigo-50 text-indigo-600 border-t border-gray-100"
+      li.className = "px-3 py-2.5 sm:py-1.5 cursor-pointer hover:bg-indigo-50 text-indigo-600 border-t border-gray-100"
       li.addEventListener("click", () => this.selectTag(query))
       this.dropdownTarget.appendChild(li)
     }

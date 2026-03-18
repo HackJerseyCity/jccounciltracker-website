@@ -33,11 +33,18 @@ module Admin
 
     def render_tags_stream
       @agenda_item.reload
-      render turbo_stream: turbo_stream.replace(
-        "agenda_item_#{@agenda_item.id}_tags",
-        partial: "admin/agenda_item_tags/tags",
-        locals: { agenda_item: @agenda_item }
-      )
+      render turbo_stream: [
+        turbo_stream.replace(
+          "agenda_item_#{@agenda_item.id}_tags",
+          partial: "admin/agenda_item_tags/tags",
+          locals: { agenda_item: @agenda_item }
+        ),
+        turbo_stream.replace(
+          "agenda_item_#{@agenda_item.id}_tags_mobile",
+          partial: "admin/agenda_item_tags/tags",
+          locals: { agenda_item: @agenda_item, id_suffix: "_mobile" }
+        )
+      ]
     end
   end
 end

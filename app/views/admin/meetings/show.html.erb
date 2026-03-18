@@ -1,15 +1,15 @@
 <%# Header %>
-<div class="mb-8">
+<div class="mb-6 sm:mb-8">
   <div class="flex items-center gap-2 text-sm text-gray-500 mb-3">
     <%= link_to "Meetings", admin_meetings_path, class: "hover:text-blue-600" %>
     <span>/</span>
     <span class="text-gray-900"><%= @meeting.date.strftime("%B %-d, %Y") %></span>
   </div>
 
-  <div class="flex items-start justify-between">
+  <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
     <div>
-      <h1 class="text-2xl font-bold text-gray-900"><%= @meeting.display_name %></h1>
-      <div class="mt-2 flex items-center gap-2">
+      <h1 class="text-xl sm:text-2xl font-bold text-gray-900"><%= @meeting.display_name %></h1>
+      <div class="mt-2 flex items-center gap-2 flex-wrap">
         <% if @agenda_version %>
           <% if @agenda_version.published? %>
             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 ring-1 ring-emerald-600/10">Published</span>
@@ -23,7 +23,7 @@
       </div>
     </div>
 
-    <div class="flex items-center gap-2">
+    <div class="flex flex-wrap items-center gap-2">
       <% if @agenda_version %>
         <% if @agenda_version.draft? %>
           <%= button_to "Publish", publish_admin_meeting_path(@meeting, version_id: @agenda_version.id), method: :post, class: "px-3.5 py-2 text-sm font-medium text-emerald-700 bg-emerald-50 rounded-lg hover:bg-emerald-100 ring-1 ring-emerald-600/10 transition-colors cursor-pointer" %>
@@ -40,7 +40,7 @@
 </div>
 
 <%# Version selector and import %>
-<div class="flex items-center justify-between mb-8">
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
   <% if @meeting.agenda_versions.size > 1 %>
     <%= form_with url: admin_meeting_path(@meeting), method: :get, local: true, class: "flex items-center gap-3" do %>
       <label for="version" class="text-sm font-medium text-gray-600">Version:</label>
@@ -54,25 +54,25 @@
     <div></div>
   <% end %>
 
-  <%= form_with url: import_minutes_admin_meeting_path(@meeting), method: :post, multipart: true, class: "flex items-center gap-3" do %>
-    <input type="file" name="minutes_file" accept=".json,.pdf" class="text-sm text-gray-500 file:mr-2 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 file:cursor-pointer file:transition-colors" />
+  <%= form_with url: import_minutes_admin_meeting_path(@meeting), method: :post, multipart: true, class: "flex flex-col sm:flex-row sm:items-center gap-3" do %>
+    <input type="file" name="minutes_file" accept=".json,.pdf" class="text-sm text-gray-500 file:mr-2 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 file:cursor-pointer file:transition-colors max-w-full min-w-0" />
     <button type="submit" class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors cursor-pointer">Import Minutes</button>
   <% end %>
 </div>
 
 <%# Stats %>
-<div class="grid grid-cols-3 gap-4 mb-8">
-  <div class="bg-white rounded-lg border border-gray-200 p-5">
-    <p class="text-2xl font-bold text-gray-900"><%= @agenda_version&.agenda_pages || "N/A" %></p>
-    <p class="text-sm text-gray-500 mt-1">Agenda pages</p>
+<div class="grid grid-cols-3 gap-3 sm:gap-4 mb-6 sm:mb-8">
+  <div class="bg-white rounded-lg border border-gray-200 p-3 sm:p-5">
+    <p class="text-xl sm:text-2xl font-bold text-gray-900"><%= @agenda_version&.agenda_pages || "N/A" %></p>
+    <p class="text-xs sm:text-sm text-gray-500 mt-1">Agenda pages</p>
   </div>
-  <div class="bg-white rounded-lg border border-gray-200 p-5">
-    <p class="text-2xl font-bold text-gray-900"><%= @agenda_sections.size %></p>
-    <p class="text-sm text-gray-500 mt-1">Sections</p>
+  <div class="bg-white rounded-lg border border-gray-200 p-3 sm:p-5">
+    <p class="text-xl sm:text-2xl font-bold text-gray-900"><%= @agenda_sections.size %></p>
+    <p class="text-xs sm:text-sm text-gray-500 mt-1">Sections</p>
   </div>
-  <div class="bg-white rounded-lg border border-gray-200 p-5">
-    <p class="text-2xl font-bold text-gray-900"><%= @agenda_sections.sum { |s| s.agenda_items.size } %></p>
-    <p class="text-sm text-gray-500 mt-1">Agenda items</p>
+  <div class="bg-white rounded-lg border border-gray-200 p-3 sm:p-5">
+    <p class="text-xl sm:text-2xl font-bold text-gray-900"><%= @agenda_sections.sum { |s| s.agenda_items.size } %></p>
+    <p class="text-xs sm:text-sm text-gray-500 mt-1">Agenda items</p>
   </div>
 </div>
 
@@ -80,19 +80,20 @@
 <div class="space-y-6">
   <% @agenda_sections.each do |section| %>
     <div class="bg-white rounded-lg border border-gray-200 overflow-hidden" data-controller="collapsible" data-collapsible-key-value="meeting-<%= @meeting.id %>-section-<%= section.id %>">
-      <button type="button" data-action="click->collapsible#toggle" class="w-full px-6 py-4 bg-gray-50 border-b border-gray-200 flex items-center justify-between cursor-pointer hover:bg-gray-100 transition-colors text-left">
+      <button type="button" data-action="click->collapsible#toggle" class="w-full px-4 sm:px-6 py-4 bg-gray-50 border-b border-gray-200 flex items-center justify-between cursor-pointer hover:bg-gray-100 transition-colors text-left">
         <div>
           <h2 class="font-semibold text-gray-900"><%= section.number %>. <%= section.title %></h2>
           <span class="text-xs text-gray-500"><%= section.section_type&.titleize %> &middot; <%= section.agenda_items.size %> items</span>
         </div>
-        <svg data-collapsible-target="icon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+        <svg data-collapsible-target="icon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 transition-transform duration-200 flex-shrink-0 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
           <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
         </svg>
       </button>
 
-      <div data-collapsible-target="content">
+      <div data-collapsible-target="content" class="overflow-x-hidden">
       <% if section.agenda_items.any? %>
-        <table class="min-w-full divide-y divide-gray-200">
+        <%# Desktop table - hidden on mobile %>
+        <table class="hidden lg:table min-w-full divide-y divide-gray-200">
           <thead class="bg-gray-50">
             <tr>
               <th class="px-6 py-2 text-left text-xs font-medium text-gray-500 uppercase">#</th>
@@ -139,6 +140,40 @@
             <% end %>
           </tbody>
         </table>
+
+        <%# Mobile cards - hidden on desktop %>
+        <div class="lg:hidden divide-y divide-gray-200">
+          <% section.agenda_items.each do |item| %>
+            <div class="p-4 space-y-3">
+              <div class="flex items-start gap-2">
+                <span class="text-xs font-medium text-gray-500 bg-gray-100 rounded px-1.5 py-0.5 flex-shrink-0"><%= item.item_number %></span>
+                <%= render "admin/agenda_items/title_mobile", item: item %>
+              </div>
+
+              <div class="flex flex-wrap items-center gap-2 text-xs">
+                <% if item.file_number.present? %>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded font-medium bg-gray-100 text-gray-800"><%= item.file_number %></span>
+                <% end %>
+                <% if item.page_start.present? %>
+                  <span class="text-gray-500">pp. <%= item.page_start %>-<%= item.page_end %></span>
+                <% end %>
+                <% if item.url.present? %>
+                  <%= link_to "PDF", item.url, target: "_blank", rel: "noopener noreferrer", class: "text-blue-600 hover:text-blue-800 font-medium" %>
+                <% end %>
+                <% if item.result.present? %>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded font-medium bg-blue-50 text-blue-700"><%= item.result.titleize %></span>
+                  <% if item.vote_tally.present? %>
+                    <span class="text-gray-500">(<%= item.vote_tally %>)</span>
+                  <% end %>
+                <% end %>
+              </div>
+
+              <div>
+                <%= render "admin/agenda_item_tags/tags", agenda_item: item, id_suffix: "_mobile" %>
+              </div>
+            </div>
+          <% end %>
+        </div>
       <% end %>
       </div>
     </div>

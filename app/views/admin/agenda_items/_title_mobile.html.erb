@@ -1,0 +1,12 @@
+<div class="flex-1 min-w-0" id="agenda_item_<%= item.id %>_title_mobile"
+     data-controller="inline-edit">
+  <span data-inline-edit-target="display"
+        class="text-sm font-medium text-gray-900 cursor-pointer hover:bg-blue-50 rounded px-1 -mx-1 py-0.5 transition-colors"
+        data-action="click->inline-edit#edit"
+        title="Tap to edit"><%= item.title %></span>
+  <%= form_with model: [:admin, item], data: { inline_edit_target: "form" }, class: "hidden" do |f| %>
+    <%= f.text_area :title, value: item.title, rows: 3,
+        class: "w-full text-sm border-gray-300 rounded shadow-sm focus:border-blue-500 focus:ring-blue-500 resize-y",
+        data: { action: "blur->inline-edit#save keydown->inline-edit#keydown" } %>
+  <% end %>
+</div>
