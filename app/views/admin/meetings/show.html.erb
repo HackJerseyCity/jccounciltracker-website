@@ -108,7 +108,7 @@
             <% section.agenda_items.each do |item| %>
               <tr>
                 <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-600"><%= item.item_number %></td>
-                <td class="px-6 py-3 text-sm text-gray-900"><%= item.title %></td>
+                <%= render "admin/agenda_items/title", item: item %>
                 <td class="px-6 py-3 whitespace-nowrap text-sm">
                   <% if item.file_number.present? %>
                     <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800"><%= item.file_number %></span>
