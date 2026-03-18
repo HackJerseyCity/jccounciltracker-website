@@ -79,13 +79,26 @@ class SearchControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "tag filter finds tagged items" do
-    get search_path, params: { tag_id: tags(:budget).id }
+    get search_path, params: { tag_ids: [ tags(:budget).id ] }
     assert_response :success
     assert_select "td", text: /Fees and Charges/
   end
 
   test "tag filter excludes untagged items" do
-    get search_path, params: { tag_id: tags(:housing).id }
+    get search_path, params: { tag_ids: [ tags(:housing).id ] }
+    assert_response :success
+    assert_select "p", text: /No agenda items match/
+  end
+
+  test "multiple tags filter with AND logic" do
+    item = agenda_items(:ordinance_with_details)
+    item.tags << tags(:infrastructure) unless item.tags.include?(tags(:infrastructure))
+
+    get search_path, params: { tag_ids: [ tags(:budget).id, tags(:infrastructure).id ] }
+    assert_response :success
+    assert_select "td", text: /Fees and Charges/
+
+    get search_path, params: { tag_ids: [ tags(:budget).id, tags(:housing).id ] }
     assert_response :success
     assert_select "p", text: /No agenda items match/
   end
@@ -120,11 +133,11 @@ class SearchControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "combined filters compose together" do
-    get search_path, params: { q: "Fees", tag_id: tags(:budget).id, result: "approved" }
+    get search_path, params: { q: "Fees", tag_ids: [ tags(:budget).id ], result: "approved" }
     assert_response :success
     assert_select "td", text: /Fees and Charges/
 
-    get search_path, params: { q: "Fees", tag_id: tags(:housing).id }
+    get search_path, params: { q: "Fees", tag_ids: [ tags(:housing).id ] }
     assert_response :success
     assert_select "p", text: /No agenda items match/
   end

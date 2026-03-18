@@ -18,7 +18,8 @@ class SearchController < ApplicationController
       scope = apply_date_filters(scope)
       scope = apply_result_filter(scope)
 
-      @total_count = scope.count
+      count_result = scope.count
+      @total_count = count_result.is_a?(Hash) ? count_result.size : count_result
       @page = [ params[:page].to_i, 1 ].max
       @total_pages = (@total_count.to_f / PER_PAGE).ceil
       @agenda_items = scope.order("meetings.date DESC, agenda_items.position ASC")
@@ -47,7 +48,7 @@ class SearchController < ApplicationController
     params[:q].present? ||
       params[:file_number].present? ||
       params[:council_member_id].present? ||
-      params[:tag_id].present? ||
+      Array(params[:tag_ids]).reject(&:blank?).any? ||
       params[:date_from].present? ||
       params[:date_to].present? ||
       (params[:result].present? && AgendaItem::VALID_RESULTS.include?(params[:result]))
@@ -74,9 +75,13 @@ class SearchController < ApplicationController
   end
 
   def apply_tag_filter(scope)
-    return scope unless params[:tag_id].present?
+    tag_ids = Array(params[:tag_ids]).reject(&:blank?).map(&:to_i)
+    return scope unless tag_ids.any?
 
-    scope.joins(:agenda_item_tags).where(agenda_item_tags: { tag_id: params[:tag_id] })
+    scope.joins(:agenda_item_tags)
+         .where(agenda_item_tags: { tag_id: tag_ids })
+         .group("agenda_items.id")
+         .having("COUNT(DISTINCT agenda_item_tags.tag_id) = ?", tag_ids.size)
   end
 
   def apply_date_filters(scope)
