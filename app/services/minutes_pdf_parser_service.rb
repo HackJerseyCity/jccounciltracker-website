@@ -22,6 +22,9 @@ class MinutesPdfParserService
     end
 
     JSON.parse(File.read(output_file.path))
+  rescue Errno::ENOENT => e
+    @errors << "Python 3 is not installed. PDF parsing requires python3 and PyMuPDF."
+    nil
   rescue JSON::ParserError => e
     @errors << "Parser produced invalid JSON: #{e.message}"
     nil
