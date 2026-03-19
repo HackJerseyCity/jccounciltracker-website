@@ -3,7 +3,7 @@ class DashboardController < ApplicationController
   layout "dashboard"
 
   def show
-    @recent_meetings = Meeting.includes(agenda_versions: { agenda_sections: :agenda_items }).chronological.limit(3)
+    @recent_meetings = Meeting.includes(agenda_versions: { agenda_sections: :agenda_items }).chronological.limit(8)
     @current_members = CouncilMember.current.alphabetical.limit(6)
     @top_tags = Tag.alphabetical
       .left_joins(agenda_item_tags: { agenda_item: { agenda_section: :agenda_version } })

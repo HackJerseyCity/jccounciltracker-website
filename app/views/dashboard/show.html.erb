@@ -1,27 +1,43 @@
 <div class="p-6 sm:p-8">
   <h1 class="text-2xl font-bold text-gray-900 mb-6">Dashboard</h1>
 
-  <%# Recent Meetings %>
+  <%# Meetings Agenda %>
   <section class="mb-8">
     <div class="flex items-center justify-between mb-4">
-      <h2 class="text-lg font-semibold text-gray-900">Recent Meetings</h2>
+      <h2 class="text-lg font-semibold text-gray-900">Meetings</h2>
       <%= link_to "View all", meetings_path, class: "text-sm text-blue-600 hover:text-blue-700 font-medium" %>
     </div>
     <% if @recent_meetings.any? %>
-      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <% @recent_meetings.each do |meeting| %>
-          <%= link_to meeting_path(meeting), class: "block bg-white rounded-lg border border-gray-200 p-5 hover:border-blue-300 hover:shadow-sm transition" do %>
-            <div class="flex items-center gap-2 mb-2">
-              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                <%= meeting.meeting_type.titleize %>
-              </span>
+      <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+        <% @recent_meetings.group_by { |m| m.date.strftime("%B %Y") }.each_with_index do |(month, meetings), idx| %>
+          <div class="<%= 'border-t border-gray-200' unless idx == 0 %>">
+            <div class="px-4 py-2 bg-gray-50 border-b border-gray-100">
+              <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider"><%= month %></h3>
             </div>
-            <h3 class="font-semibold text-gray-900"><%= meeting.date.strftime("%B %-d, %Y") %></h3>
-            <div class="mt-2 flex items-center gap-3 text-sm text-gray-500">
-              <span><%= meeting.agenda_sections.size %> sections</span>
-              <span><%= meeting.agenda_items.size %> items</span>
-            </div>
-          <% end %>
+            <% meetings.each_with_index do |meeting, midx| %>
+              <%= link_to meeting_path(meeting), class: "flex items-center gap-4 px-4 py-3 hover:bg-blue-50 transition #{'border-t border-gray-100' unless midx == 0}" do %>
+                <div class="flex-shrink-0 w-12 text-center">
+                  <div class="text-2xl font-bold text-gray-900 leading-none"><%= meeting.date.day %></div>
+                  <div class="text-xs text-gray-400 uppercase mt-0.5"><%= meeting.date.strftime("%a") %></div>
+                </div>
+                <div class="flex-shrink-0 w-px h-10 bg-gray-200"></div>
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center gap-2">
+                    <span class="font-medium text-gray-900"><%= meeting.meeting_type.titleize %> Meeting</span>
+                    <% if meeting.date >= Date.current %>
+                      <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-green-100 text-green-700">Upcoming</span>
+                    <% end %>
+                  </div>
+                  <div class="text-sm text-gray-500 mt-0.5">
+                    <%= meeting.agenda_sections.size %> sections · <%= meeting.agenda_items.size %> items
+                  </div>
+                </div>
+                <div class="flex-shrink-0 text-gray-300">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5l7 7-7 7"/></svg>
+                </div>
+              <% end %>
+            <% end %>
+          </div>
         <% end %>
       </div>
     <% else %>
