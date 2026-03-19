@@ -20,6 +20,16 @@ module Admin
       end
     end
 
+    def destroy
+      @agenda_item = AgendaItem.find(params[:id])
+      @agenda_item.destroy
+
+      render turbo_stream: [
+        turbo_stream.remove("agenda_item_#{@agenda_item.id}"),
+        turbo_stream.remove("agenda_item_#{@agenda_item.id}_mobile")
+      ]
+    end
+
     private
 
     def agenda_item_params
