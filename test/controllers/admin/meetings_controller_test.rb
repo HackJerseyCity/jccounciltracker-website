@@ -95,7 +95,7 @@ class Admin::MeetingsControllerTest < ActionDispatch::IntegrationTest
     assert_response :unprocessable_entity
   end
 
-  test "create with duplicate meeting creates new version" do
+  test "create with duplicate meeting redirects to diff preview" do
     sign_in_as(users(:content_admin))
 
     json_data = {
@@ -110,15 +110,16 @@ class Admin::MeetingsControllerTest < ActionDispatch::IntegrationTest
       StringIO.new(json_data), "application/json", false, original_filename: "dup.json"
     )
 
+    meeting = meetings(:regular_meeting)
+
     assert_no_difference "Meeting.count" do
-      assert_difference "AgendaVersion.count", 1 do
+      assert_no_difference "AgendaVersion.count" do
         post admin_meetings_path, params: { agenda_file: file }
       end
     end
 
-    meeting = meetings(:regular_meeting)
-    assert_redirected_to admin_meeting_path(meeting)
-    assert_match(/New version/, flash[:notice])
+    assert_response :redirect
+    assert response.location.include?("preview_agenda")
   end
 
   # --- import_minutes ---

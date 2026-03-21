@@ -1,0 +1,123 @@
+<%# Header %>
+<div class="mb-6">
+  <div class="flex items-center gap-2 text-sm text-gray-500 mb-3">
+    <%= link_to "Meetings", admin_meetings_path, class: "hover:text-blue-600" %>
+    <span>/</span>
+    <%= link_to @meeting.display_name, admin_meeting_path(@meeting), class: "hover:text-blue-600" %>
+    <span>/</span>
+    <span class="text-gray-900">Review Changes</span>
+  </div>
+
+  <h1 class="text-2xl font-bold text-gray-900">Review Agenda Changes</h1>
+  <p class="mt-1 text-sm text-gray-500">
+    Comparing new upload against current version for <strong><%= @meeting.display_name %></strong>.
+    Select changes to accept, then apply.
+  </p>
+</div>
+
+<%# Summary %>
+<div class="grid grid-cols-3 gap-3 mb-6">
+  <% added = @diff.changes[:sections].count { |c| c[:type] == :added } %>
+  <% modified = @diff.changes[:sections].count { |c| c[:type] == :modified } %>
+  <% removed = @diff.changes[:sections].count { |c| c[:type] == :removed } %>
+
+  <div class="bg-emerald-50 rounded-lg border border-emerald-200 p-4">
+    <p class="text-2xl font-bold text-emerald-700"><%= added %></p>
+    <p class="text-sm text-emerald-600">New items</p>
+  </div>
+  <div class="bg-amber-50 rounded-lg border border-amber-200 p-4">
+    <p class="text-2xl font-bold text-amber-700"><%= modified %></p>
+    <p class="text-sm text-amber-600">Modified items</p>
+  </div>
+  <div class="bg-red-50 rounded-lg border border-red-200 p-4">
+    <p class="text-2xl font-bold text-red-700"><%= removed %></p>
+    <p class="text-sm text-red-600">Removed items</p>
+  </div>
+</div>
+
+<%= form_with url: apply_agenda_admin_meeting_path(@meeting), method: :post, data: { controller: "diff-review" } do |f| %>
+  <input type="hidden" name="cache_key" value="<%= @cache_key %>" />
+
+  <%# Toolbar %>
+  <div class="flex items-center gap-3 mb-4 sticky top-0 bg-gray-50 py-3 z-10 border-b border-gray-200 -mx-4 px-4 sm:-mx-6 sm:px-6">
+    <button type="button" data-action="click->diff-review#selectAll" class="px-3 py-1.5 text-xs font-medium rounded-md bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors cursor-pointer">Select All</button>
+    <button type="button" data-action="click->diff-review#selectNone" class="px-3 py-1.5 text-xs font-medium rounded-md bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors cursor-pointer">Deselect All</button>
+    <span class="text-sm text-gray-500" data-diff-review-target="counter">0 selected</span>
+    <div class="ml-auto flex gap-2">
+      <%= link_to "Cancel", admin_meeting_path(@meeting), class: "px-4 py-2 text-sm font-medium text-gray-700 bg-white rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors" %>
+      <%= f.submit "Apply Selected Changes", class: "px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors cursor-pointer" %>
+    </div>
+  </div>
+
+  <%# Changes list %>
+  <div class="space-y-3">
+    <% @diff.changes[:sections].each do |change| %>
+      <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+        <label class="flex items-start gap-3 p-4 cursor-pointer hover:bg-gray-50 transition-colors">
+          <input type="checkbox" name="accepted[<%= change[:item_number] %>]" value="1"
+                 data-diff-review-target="checkbox" data-action="change->diff-review#updateCounter"
+                 class="mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500" checked />
+
+          <div class="flex-1 min-w-0">
+            <%# Change type badge and item number %>
+            <div class="flex items-center gap-2 mb-2">
+              <% case change[:type] %>
+              <% when :added %>
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-emerald-100 text-emerald-800">Added</span>
+              <% when :modified %>
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800">Modified</span>
+              <% when :removed %>
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">Removed</span>
+              <% end %>
+              <span class="text-sm font-medium text-gray-900"><%= change[:item_number] %></span>
+              <% if change[:new]&.dig(:section_title) %>
+                <span class="text-xs text-gray-500"><%= change[:new][:section_title] %></span>
+              <% elsif change[:old]&.dig(:section_title) %>
+                <span class="text-xs text-gray-500"><%= change[:old][:section_title] %></span>
+              <% end %>
+            </div>
+
+            <% case change[:type] %>
+            <% when :added %>
+              <p class="text-sm text-gray-700"><%= change[:new][:title] %></p>
+              <div class="mt-2 flex flex-wrap gap-2 text-xs text-gray-500">
+                <% if change[:new][:file_number].present? %>
+                  <span class="bg-gray-100 px-2 py-0.5 rounded"><%= change[:new][:file_number] %></span>
+                <% end %>
+                <% if change[:new][:page_start].present? %>
+                  <span>pp. <%= change[:new][:page_start] %>-<%= change[:new][:page_end] %></span>
+                <% end %>
+              </div>
+
+            <% when :removed %>
+              <p class="text-sm text-gray-500 line-through"><%= change[:old][:title] %></p>
+
+            <% when :modified %>
+              <% change[:diffs].each do |diff| %>
+                <div class="mb-2">
+                  <span class="text-xs font-medium text-gray-500 uppercase"><%= diff[:field].to_s.titleize %></span>
+                  <div class="mt-0.5 text-sm">
+                    <% if diff[:field] == :title %>
+                      <div class="bg-red-50 text-red-800 px-2 py-1 rounded-t text-sm border border-red-200"><%= diff[:old] %></div>
+                      <div class="bg-emerald-50 text-emerald-800 px-2 py-1 rounded-b text-sm border border-emerald-200 border-t-0"><%= diff[:new] %></div>
+                    <% else %>
+                      <span class="text-red-600 line-through"><%= diff[:old].presence || "empty" %></span>
+                      <span class="text-gray-400 mx-1">&rarr;</span>
+                      <span class="text-emerald-700"><%= diff[:new].presence || "empty" %></span>
+                    <% end %>
+                  </div>
+                </div>
+              <% end %>
+            <% end %>
+          </div>
+        </label>
+      </div>
+    <% end %>
+  </div>
+
+  <%# Bottom actions %>
+  <div class="mt-6 flex items-center gap-3 justify-end">
+    <%= link_to "Cancel", admin_meeting_path(@meeting), class: "px-4 py-2 text-sm font-medium text-gray-700 bg-white rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors" %>
+    <%= f.submit "Apply Selected Changes", class: "px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors cursor-pointer" %>
+  </div>
+<% end %>

@@ -13,6 +13,9 @@ Rails.application.routes.draw do
       post :import_minutes, on: :member
       delete :delete_minutes, on: :member
       post :publish, on: :member
+      get :preview_agenda, on: :member
+      post :apply_agenda, on: :member
+      get :reupload_agenda, on: :member
     end
     resources :council_members
     resources :tags, only: [ :index, :update, :destroy ] do

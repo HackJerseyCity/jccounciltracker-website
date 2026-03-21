@@ -30,6 +30,21 @@ module Admin
       end
       return render :new, status: :unprocessable_entity unless data
 
+      # Check if a meeting already exists for this data — if so, show diff
+      meeting_data = data["meeting"]
+      existing_meeting = Meeting.find_by(date: meeting_data["date"], meeting_type: meeting_data["type"])
+
+      if existing_meeting&.current_version
+        diff_service = AgendaDiffService.new(existing_meeting, data).call
+        if diff_service.has_changes?
+          cache_key = "agenda_preview_#{existing_meeting.id}_#{SecureRandom.hex(8)}"
+          Rails.cache.write(cache_key, data, expires_in: 30.minutes)
+          redirect_to preview_agenda_admin_meeting_path(existing_meeting, cache_key: cache_key)
+          return
+        end
+      end
+
+      # No existing meeting or no changes — import normally
       service = AgendaImportService.new(data).call
 
       if service.success?
@@ -43,6 +58,54 @@ module Admin
         flash.now[:alert] = service.errors.join(", ")
         render :new, status: :unprocessable_entity
       end
+    end
+
+    def preview_agenda
+      @meeting = Meeting.find(params[:id])
+      @cache_key = params[:cache_key]
+      data = Rails.cache.read(@cache_key)
+
+      unless data
+        redirect_to admin_meeting_path(@meeting), alert: "Preview data expired. Please re-upload."
+        return
+      end
+
+      @diff = AgendaDiffService.new(@meeting, data).call
+      unless @diff.has_changes?
+        redirect_to admin_meeting_path(@meeting), notice: "No changes detected."
+      end
+    end
+
+    def apply_agenda
+      @meeting = Meeting.find(params[:id])
+      cache_key = params[:cache_key]
+      data = Rails.cache.read(cache_key)
+
+      unless data
+        redirect_to admin_meeting_path(@meeting), alert: "Preview data expired. Please re-upload."
+        return
+      end
+
+      accepted = params[:accepted] || []
+      accepted = accepted.keys if accepted.is_a?(ActionController::Parameters)
+
+      if accepted.empty?
+        redirect_to admin_meeting_path(@meeting), notice: "No changes accepted."
+        return
+      end
+
+      service = AgendaApplyChangesService.new(@meeting, data, accepted).call
+      Rails.cache.delete(cache_key)
+
+      if service.success?
+        redirect_to admin_meeting_path(@meeting), notice: "#{accepted.size} change(s) applied successfully."
+      else
+        redirect_to admin_meeting_path(@meeting), alert: service.errors.join(", ")
+      end
+    end
+
+    def reupload_agenda
+      @meeting = Meeting.find(params[:id])
     end
 
     def import_minutes
