@@ -15,7 +15,7 @@ Rails.application.routes.draw do
       post :publish, on: :member
     end
     resources :council_members
-    resources :tags, only: [ :index, :destroy ] do
+    resources :tags, only: [ :index, :update, :destroy ] do
       get :search, on: :collection
     end
     resources :agenda_items, only: [ :update, :destroy ]

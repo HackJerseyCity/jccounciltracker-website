@@ -67,6 +67,35 @@ class Admin::TagsControllerTest < ActionDispatch::IntegrationTest
     assert_select "span.bg-indigo-100", text: "Budget"
   end
 
+  # --- update ---
+
+  test "update requires authentication" do
+    patch admin_tag_path(tags(:housing)), params: { tag: { name: "Renamed" } }
+    assert_redirected_to new_session_path
+    assert_equal "Housing", tags(:housing).reload.name
+  end
+
+  test "update renames a tag" do
+    sign_in_as(users(:content_admin))
+    patch admin_tag_path(tags(:housing)), params: { tag: { name: "Affordable Housing" } }
+    assert_redirected_to admin_tags_path
+    assert_equal "Affordable Housing", tags(:housing).reload.name
+  end
+
+  test "update rejects blank name" do
+    sign_in_as(users(:content_admin))
+    patch admin_tag_path(tags(:housing)), params: { tag: { name: "" } }
+    assert_redirected_to admin_tags_path
+    assert_equal "Housing", tags(:housing).reload.name
+  end
+
+  test "update rejects duplicate name" do
+    sign_in_as(users(:content_admin))
+    patch admin_tag_path(tags(:housing)), params: { tag: { name: "Budget" } }
+    assert_redirected_to admin_tags_path
+    assert_equal "Housing", tags(:housing).reload.name
+  end
+
   # --- destroy ---
 
   test "destroy requires authentication" do

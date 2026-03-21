@@ -228,6 +228,7 @@ def parse_agenda(pdf_path):
                 page_end = int(ma.group(2))
                 item_number = candidate_item
                 title_parts = [ma.group(4).strip()]
+                file_number = None
                 i += 1
                 # Gather continuation lines
                 while i < len(lines):
@@ -239,8 +240,14 @@ def parse_agenda(pdf_path):
                         break
                     if pattern_a.match(lines[i]) or pattern_b_range_item.match(lines[i]) or pattern_c_range.match(lines[i]):
                         break
+                    # Capture file number but continue (may appear mid-title at page breaks)
                     if file_number_re.match(nline):
-                        break
+                        fm = file_number_re.search(nline)
+                        if fm and not file_number:
+                            file_number = fm.group(1)
+                            file_number = re.sub(r'(Ord|Res)\.\s*', r'\1. ', file_number)
+                        i += 1
+                        continue
                     # Check if it's a new item number
                     if item_number_alone.match(lines[i]) or item_with_title.match(lines[i]):
                         test_m = item_with_title.match(lines[i]) or item_number_alone.match(lines[i])
@@ -250,18 +257,19 @@ def parse_agenda(pdf_path):
                     i += 1
 
                 title = " ".join(title_parts)
-                title = re.sub(r'\s*(?:Ord|Res)\.\s*\d{2}-\d{3}\s*-?\s*Pdf\s*$', '', title).strip()
+                title = re.sub(r'\s*(?:Ord|Res)\.\s*\d{2}-\d{3}\s*-?\s*(?:Pdf|Withdrawn\s*-?\s*Pdf)?\s*$', '', title).strip()
+                title = re.sub(r'\s*(?:Withdrawn\s*-?\s*Pdf|Pdf)\s*$', '', title).strip()
                 title = re.sub(r'\s+', ' ', title)
 
-                # Look for file number in upcoming lines
-                file_number = None
-                for j in range(i, min(i + 3, len(lines))):
-                    fm = file_number_re.search(lines[j])
-                    if fm:
-                        file_number = fm.group(1)
-                        file_number = re.sub(r'(Ord|Res)\.\s*', r'\1. ', file_number)
-                        i = j + 1
-                        break
+                # Look for file number in upcoming lines if not found during title gathering
+                if not file_number:
+                    for j in range(i, min(i + 3, len(lines))):
+                        fm = file_number_re.search(lines[j])
+                        if fm:
+                            file_number = fm.group(1)
+                            file_number = re.sub(r'(Ord|Res)\.\s*', r'\1. ', file_number)
+                            i = j + 1
+                            break
 
                 current_section["items"].append({
                     "item_number": item_number,
@@ -282,6 +290,7 @@ def parse_agenda(pdf_path):
                 page_end = int(mb.group(2))
                 item_number = candidate_item
                 title_parts = []
+                file_number = None
                 i += 1
                 # Gather title lines
                 while i < len(lines):
@@ -293,8 +302,14 @@ def parse_agenda(pdf_path):
                         break
                     if pattern_a.match(lines[i]) or pattern_b_range_item.match(lines[i]) or pattern_c_range.match(lines[i]):
                         break
+                    # Capture file number but continue (may appear mid-title at page breaks)
                     if file_number_re.match(nline):
-                        break
+                        fm = file_number_re.search(nline)
+                        if fm and not file_number:
+                            file_number = fm.group(1)
+                            file_number = re.sub(r'(Ord|Res)\.\s*', r'\1. ', file_number)
+                        i += 1
+                        continue
                     if item_number_alone.match(lines[i]) or item_with_title.match(lines[i]):
                         test_m = item_with_title.match(lines[i]) or item_number_alone.match(lines[i])
                         if test_m and test_m.group(1).startswith(f"{sec_num}."):
@@ -303,17 +318,18 @@ def parse_agenda(pdf_path):
                     i += 1
 
                 title = " ".join(title_parts)
-                title = re.sub(r'\s*(?:Ord|Res)\.\s*\d{2}-\d{3}\s*-?\s*Pdf\s*$', '', title).strip()
+                title = re.sub(r'\s*(?:Ord|Res)\.\s*\d{2}-\d{3}\s*-?\s*(?:Pdf|Withdrawn\s*-?\s*Pdf)?\s*$', '', title).strip()
+                title = re.sub(r'\s*(?:Withdrawn\s*-?\s*Pdf|Pdf)\s*$', '', title).strip()
                 title = re.sub(r'\s+', ' ', title)
 
-                file_number = None
-                for j in range(i, min(i + 3, len(lines))):
-                    fm = file_number_re.search(lines[j])
-                    if fm:
-                        file_number = fm.group(1)
-                        file_number = re.sub(r'(Ord|Res)\.\s*', r'\1. ', file_number)
-                        i = j + 1
-                        break
+                if not file_number:
+                    for j in range(i, min(i + 3, len(lines))):
+                        fm = file_number_re.search(lines[j])
+                        if fm:
+                            file_number = fm.group(1)
+                            file_number = re.sub(r'(Ord|Res)\.\s*', r'\1. ', file_number)
+                            i = j + 1
+                            break
 
                 current_section["items"].append({
                     "item_number": item_number,
@@ -344,6 +360,7 @@ def parse_agenda(pdf_path):
                 i += 1
                 # Gather title lines
                 title_parts = []
+                file_number = None
                 while i < len(lines):
                     nline = lines[i].strip()
                     if not nline:
@@ -353,8 +370,14 @@ def parse_agenda(pdf_path):
                         break
                     if pattern_a.match(lines[i]) or pattern_b_range_item.match(lines[i]) or pattern_c_range.match(lines[i]):
                         break
+                    # Capture file number but continue (may appear mid-title at page breaks)
                     if file_number_re.match(nline):
-                        break
+                        fm = file_number_re.search(nline)
+                        if fm and not file_number:
+                            file_number = fm.group(1)
+                            file_number = re.sub(r'(Ord|Res)\.\s*', r'\1. ', file_number)
+                        i += 1
+                        continue
                     if item_number_alone.match(lines[i]) or item_with_title.match(lines[i]):
                         test_m = item_with_title.match(lines[i]) or item_number_alone.match(lines[i])
                         if test_m and test_m.group(1).startswith(f"{sec_num}."):
@@ -363,17 +386,18 @@ def parse_agenda(pdf_path):
                     i += 1
 
                 title = " ".join(title_parts)
-                title = re.sub(r'\s*(?:Ord|Res)\.\s*\d{2}-\d{3}\s*-?\s*Pdf\s*$', '', title).strip()
+                title = re.sub(r'\s*(?:Ord|Res)\.\s*\d{2}-\d{3}\s*-?\s*(?:Pdf|Withdrawn\s*-?\s*Pdf)?\s*$', '', title).strip()
+                title = re.sub(r'\s*(?:Withdrawn\s*-?\s*Pdf|Pdf)\s*$', '', title).strip()
                 title = re.sub(r'\s+', ' ', title)
 
-                file_number = None
-                for j in range(i, min(i + 3, len(lines))):
-                    fm = file_number_re.search(lines[j])
-                    if fm:
-                        file_number = fm.group(1)
-                        file_number = re.sub(r'(Ord|Res)\.\s*', r'\1. ', file_number)
-                        i = j + 1
-                        break
+                if not file_number:
+                    for j in range(i, min(i + 3, len(lines))):
+                        fm = file_number_re.search(lines[j])
+                        if fm:
+                            file_number = fm.group(1)
+                            file_number = re.sub(r'(Ord|Res)\.\s*', r'\1. ', file_number)
+                            i = j + 1
+                            break
 
                 current_section["items"].append({
                     "item_number": item_number,
@@ -388,6 +412,7 @@ def parse_agenda(pdf_path):
                 # Item number + title on same line after page range
                 item_number = mi2.group(1)
                 title_parts = [mi2.group(2).strip()]
+                file_number = None
                 i += 1
                 while i < len(lines):
                     nline = lines[i].strip()
@@ -398,8 +423,14 @@ def parse_agenda(pdf_path):
                         break
                     if pattern_a.match(lines[i]) or pattern_b_range_item.match(lines[i]) or pattern_c_range.match(lines[i]):
                         break
+                    # Capture file number but continue (may appear mid-title at page breaks)
                     if file_number_re.match(nline):
-                        break
+                        fm = file_number_re.search(nline)
+                        if fm and not file_number:
+                            file_number = fm.group(1)
+                            file_number = re.sub(r'(Ord|Res)\.\s*', r'\1. ', file_number)
+                        i += 1
+                        continue
                     if item_number_alone.match(lines[i]) or item_with_title.match(lines[i]):
                         test_m = item_with_title.match(lines[i]) or item_number_alone.match(lines[i])
                         if test_m and test_m.group(1).startswith(f"{sec_num}."):
@@ -408,17 +439,18 @@ def parse_agenda(pdf_path):
                     i += 1
 
                 title = " ".join(title_parts)
-                title = re.sub(r'\s*(?:Ord|Res)\.\s*\d{2}-\d{3}\s*-?\s*Pdf\s*$', '', title).strip()
+                title = re.sub(r'\s*(?:Ord|Res)\.\s*\d{2}-\d{3}\s*-?\s*(?:Pdf|Withdrawn\s*-?\s*Pdf)?\s*$', '', title).strip()
+                title = re.sub(r'\s*(?:Withdrawn\s*-?\s*Pdf|Pdf)\s*$', '', title).strip()
                 title = re.sub(r'\s+', ' ', title)
 
-                file_number = None
-                for j in range(i, min(i + 3, len(lines))):
-                    fm = file_number_re.search(lines[j])
-                    if fm:
-                        file_number = fm.group(1)
-                        file_number = re.sub(r'(Ord|Res)\.\s*', r'\1. ', file_number)
-                        i = j + 1
-                        break
+                if not file_number:
+                    for j in range(i, min(i + 3, len(lines))):
+                        fm = file_number_re.search(lines[j])
+                        if fm:
+                            file_number = fm.group(1)
+                            file_number = re.sub(r'(Ord|Res)\.\s*', r'\1. ', file_number)
+                            i = j + 1
+                            break
 
                 current_section["items"].append({
                     "item_number": item_number,
@@ -438,6 +470,7 @@ def parse_agenda(pdf_path):
             item_number = mi.group(1)
             i += 1
             title_parts = []
+            file_number = None
             while i < len(lines):
                 nline = lines[i].strip()
                 if not nline:
@@ -447,8 +480,14 @@ def parse_agenda(pdf_path):
                     break
                 if pattern_a.match(lines[i]) or pattern_b_range_item.match(lines[i]) or pattern_c_range.match(lines[i]):
                     break
+                # Capture file number but continue (may appear mid-title at page breaks)
                 if file_number_re.match(nline):
-                    break
+                    fm = file_number_re.search(nline)
+                    if fm and not file_number:
+                        file_number = fm.group(1)
+                        file_number = re.sub(r'(Ord|Res)\.\s*', r'\1. ', file_number)
+                    i += 1
+                    continue
                 if item_number_alone.match(lines[i]):
                     test_m = item_number_alone.match(lines[i])
                     if test_m and test_m.group(1).startswith(f"{sec_num}."):
@@ -461,16 +500,18 @@ def parse_agenda(pdf_path):
                 i += 1
 
             title = " ".join(title_parts)
+            title = re.sub(r'\s*(?:Ord|Res)\.\s*\d{2}-\d{3}\s*-?\s*(?:Pdf|Withdrawn\s*-?\s*Pdf)?\s*$', '', title).strip()
+            title = re.sub(r'\s*(?:Withdrawn\s*-?\s*Pdf|Pdf)\s*$', '', title).strip()
             title = re.sub(r'\s+', ' ', title).strip()
 
-            file_number = None
-            for j in range(i, min(i + 3, len(lines))):
-                fm = file_number_re.search(lines[j])
-                if fm:
-                    file_number = fm.group(1)
-                    file_number = re.sub(r'(Ord|Res)\.\s*', r'\1. ', file_number)
-                    i = j + 1
-                    break
+            if not file_number:
+                for j in range(i, min(i + 3, len(lines))):
+                    fm = file_number_re.search(lines[j])
+                    if fm:
+                        file_number = fm.group(1)
+                        file_number = re.sub(r'(Ord|Res)\.\s*', r'\1. ', file_number)
+                        i = j + 1
+                        break
 
             current_section["items"].append({
                 "item_number": item_number,
@@ -487,6 +528,7 @@ def parse_agenda(pdf_path):
         if mi2 and mi2.group(1).startswith(f"{sec_num}."):
             item_number = mi2.group(1)
             title_parts = [mi2.group(2).strip()]
+            file_number = None
             i += 1
             while i < len(lines):
                 nline = lines[i].strip()
@@ -497,8 +539,14 @@ def parse_agenda(pdf_path):
                     break
                 if pattern_a.match(lines[i]) or pattern_b_range_item.match(lines[i]) or pattern_c_range.match(lines[i]):
                     break
+                # Capture file number but continue (may appear mid-title at page breaks)
                 if file_number_re.match(nline):
-                    break
+                    fm = file_number_re.search(nline)
+                    if fm and not file_number:
+                        file_number = fm.group(1)
+                        file_number = re.sub(r'(Ord|Res)\.\s*', r'\1. ', file_number)
+                    i += 1
+                    continue
                 if item_number_alone.match(lines[i]):
                     test_m = item_number_alone.match(lines[i])
                     if test_m and test_m.group(1).startswith(f"{sec_num}."):
@@ -511,16 +559,18 @@ def parse_agenda(pdf_path):
                 i += 1
 
             title = " ".join(title_parts)
+            title = re.sub(r'\s*(?:Ord|Res)\.\s*\d{2}-\d{3}\s*-?\s*(?:Pdf|Withdrawn\s*-?\s*Pdf)?\s*$', '', title).strip()
+            title = re.sub(r'\s*(?:Withdrawn\s*-?\s*Pdf|Pdf)\s*$', '', title).strip()
             title = re.sub(r'\s+', ' ', title).strip()
 
-            file_number = None
-            for j in range(i, min(i + 3, len(lines))):
-                fm = file_number_re.search(lines[j])
-                if fm:
-                    file_number = fm.group(1)
-                    file_number = re.sub(r'(Ord|Res)\.\s*', r'\1. ', file_number)
-                    i = j + 1
-                    break
+            if not file_number:
+                for j in range(i, min(i + 3, len(lines))):
+                    fm = file_number_re.search(lines[j])
+                    if fm:
+                        file_number = fm.group(1)
+                        file_number = re.sub(r'(Ord|Res)\.\s*', r'\1. ', file_number)
+                        i = j + 1
+                        break
 
             current_section["items"].append({
                 "item_number": item_number,

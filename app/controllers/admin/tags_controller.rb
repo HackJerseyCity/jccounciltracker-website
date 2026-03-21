@@ -9,6 +9,15 @@ module Admin
       @tags = @tags.search(params[:q]) if params[:q].present?
     end
 
+    def update
+      @tag = Tag.find(params[:id])
+      if @tag.update(tag_params)
+        redirect_to admin_tags_path(q: params[:q]), notice: "Tag renamed to \"#{@tag.name}\"."
+      else
+        redirect_to admin_tags_path(q: params[:q]), alert: @tag.errors.full_messages.to_sentence
+      end
+    end
+
     def destroy
       @tag = Tag.find(params[:id])
       @tag.destroy
@@ -18,6 +27,12 @@ module Admin
     def search
       tags = Tag.search(params[:q].to_s).alphabetical.limit(10)
       render json: tags.map { |t| { id: t.id, name: t.name } }
+    end
+
+    private
+
+    def tag_params
+      params.require(:tag).permit(:name)
     end
   end
 end

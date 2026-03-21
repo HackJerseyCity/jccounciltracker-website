@@ -31,9 +31,12 @@ export default class extends Controller {
     if (event.key === "Escape") {
       event.preventDefault()
       this.cancel()
-    } else if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
-      event.preventDefault()
-      this.save()
+    } else if (event.key === "Enter") {
+      const isTextarea = event.target.tagName === "TEXTAREA"
+      if (!isTextarea || event.metaKey || event.ctrlKey) {
+        event.preventDefault()
+        this.save()
+      }
     }
   }
 
