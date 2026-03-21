@@ -19,41 +19,18 @@
   <table class="min-w-full divide-y divide-gray-200">
     <thead class="bg-gray-50">
       <tr>
-        <th class="px-4 py-3 sm:px-6 text-left text-xs font-medium text-gray-500 uppercase">Tag</th>
-        <th class="px-4 py-3 sm:px-6 text-left text-xs font-medium text-gray-500 uppercase">Items</th>
+        <th class="px-4 py-3 sm:px-6 text-left text-xs font-medium uppercase">
+          <%= sortable_column("name", "Tag", path_helper: :admin_tags_path) %>
+        </th>
+        <th class="px-4 py-3 sm:px-6 text-left text-xs font-medium uppercase">
+          <%= sortable_column("items", "Items", path_helper: :admin_tags_path, default_column: "items") %>
+        </th>
         <th class="px-4 py-3 sm:px-6 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
       </tr>
     </thead>
     <tbody class="divide-y divide-gray-200">
       <% @tags.each do |tag| %>
-        <tr class="<%= "bg-red-50/50" if tag.items_count == 0 %>" data-controller="inline-edit">
-          <td class="px-4 py-3 sm:px-6 text-sm text-gray-900">
-            <div data-inline-edit-target="display">
-              <span class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-800"><%= tag.name %></span>
-            </div>
-            <%= form_with model: tag, url: admin_tag_path(tag, q: params[:q]), method: :patch, class: "hidden", data: { inline_edit_target: "form" } do |f| %>
-              <div class="flex items-center gap-2">
-                <%= f.text_field :name, class: "rounded-md border border-gray-300 px-2 py-1 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500", data: { action: "keydown->inline-edit#keydown" } %>
-                <button type="submit" class="text-green-600 hover:text-green-800 font-medium text-xs cursor-pointer">Save</button>
-                <button type="button" class="text-gray-500 hover:text-gray-700 font-medium text-xs cursor-pointer" data-action="inline-edit#cancel">Cancel</button>
-              </div>
-            <% end %>
-          </td>
-          <td class="px-4 py-3 sm:px-6 text-sm">
-            <% if tag.items_count == 0 %>
-              <span class="text-red-600 font-medium">0 items</span>
-            <% else %>
-              <span class="text-gray-600"><%= tag.items_count %> <%= "item".pluralize(tag.items_count) %></span>
-            <% end %>
-          </td>
-          <td class="px-4 py-3 sm:px-6 text-right text-sm space-x-2">
-            <button type="button" class="text-blue-600 hover:text-blue-800 font-medium cursor-pointer" data-action="inline-edit#edit">Edit</button>
-            <%= button_to "Delete", admin_tag_path(tag, q: params[:q]),
-                  method: :delete,
-                  class: "text-red-600 hover:text-red-800 font-medium cursor-pointer",
-                  data: { turbo_confirm: "Delete tag \"#{tag.name}\"? This will remove it from #{tag.items_count} item#{"s" unless tag.items_count == 1}." } %>
-          </td>
-        </tr>
+        <%= render partial: "admin/tags/tag", locals: { tag: tag } %>
       <% end %>
     </tbody>
   </table>

@@ -57,6 +57,15 @@ module ApplicationHelper
     end
   end
 
+  def sortable_column(column, label, path_helper:, default_column: nil)
+    current = params[:sort] == column || (params[:sort].blank? && column == default_column)
+    next_dir = current && params[:direction] != "desc" ? "desc" : "asc"
+    arrow = current ? (params[:direction] == "desc" ? " \u2193" : " \u2191") : ""
+    link_to "#{label}#{arrow}".html_safe,
+      send(path_helper, sort: column, direction: next_dir, q: params[:q]),
+      class: "inline-flex items-center gap-1 #{current ? "text-gray-900" : "text-gray-500 hover:text-gray-700"}"
+  end
+
   def bottom_nav_link(label, path, icon_name)
     active = current_sidebar_item == icon_name
     base_classes = "flex flex-col items-center justify-center gap-0.5 flex-1 py-1 text-[10px] font-medium transition-colors"
