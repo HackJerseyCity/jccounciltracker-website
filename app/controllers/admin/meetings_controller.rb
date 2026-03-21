@@ -18,12 +18,16 @@ module Admin
     end
 
     def create
-      unless params[:agenda_file].present?
-        flash.now[:alert] = "Please select a file to upload."
+      unless params[:agenda_file].present? || params[:agenda_url].present?
+        flash.now[:alert] = "Please select a file to upload or enter a URL."
         return render :new, status: :unprocessable_entity
       end
 
-      data = parse_agenda_upload(params[:agenda_file])
+      data = if params[:agenda_url].present?
+        parse_agenda_url(params[:agenda_url])
+      else
+        parse_agenda_upload(params[:agenda_file])
+      end
       return render :new, status: :unprocessable_entity unless data
 
       service = AgendaImportService.new(data).call
@@ -44,12 +48,16 @@ module Admin
     def import_minutes
       @meeting = Meeting.find(params[:id])
 
-      unless params[:minutes_file].present?
-        redirect_to admin_meeting_path(@meeting), alert: "Please select a file to upload."
+      unless params[:minutes_file].present? || params[:minutes_url].present?
+        redirect_to admin_meeting_path(@meeting), alert: "Please select a file to upload or enter a URL."
         return
       end
 
-      data = parse_minutes_upload(params[:minutes_file])
+      data = if params[:minutes_url].present?
+        parse_minutes_url(params[:minutes_url])
+      else
+        parse_minutes_upload(params[:minutes_file])
+      end
       unless data
         redirect_to admin_meeting_path(@meeting), alert: @parse_error
         return
@@ -131,6 +139,26 @@ module Admin
     rescue JSON::ParserError
       @parse_error = "Invalid JSON file."
       nil
+    end
+
+    def parse_agenda_url(url)
+      parser = AgendaUrlParserService.new(url)
+      data = parser.call
+      unless parser.success?
+        flash.now[:alert] = parser.errors.join(", ")
+        return nil
+      end
+      data
+    end
+
+    def parse_minutes_url(url)
+      parser = MinutesUrlParserService.new(url)
+      data = parser.call
+      unless parser.success?
+        @parse_error = parser.errors.join(", ")
+        return nil
+      end
+      data
     end
 
     def pdf_file?(file)

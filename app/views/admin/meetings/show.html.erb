@@ -54,10 +54,26 @@
     <div></div>
   <% end %>
 
-  <%= form_with url: import_minutes_admin_meeting_path(@meeting), method: :post, multipart: true, class: "flex flex-col sm:flex-row sm:items-center gap-3" do %>
-    <input type="file" name="minutes_file" accept=".json,.pdf" class="text-sm text-gray-500 file:mr-2 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 file:cursor-pointer file:transition-colors max-w-full min-w-0" />
-    <button type="submit" class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors cursor-pointer">Import Minutes</button>
-  <% end %>
+  <div data-controller="upload-toggle">
+    <div class="flex gap-2 mb-3">
+      <button type="button" data-action="click->upload-toggle#showFile" data-upload-toggle-target="fileTab" class="px-2.5 py-1 text-xs font-medium rounded-md bg-blue-600 text-white transition-colors cursor-pointer">File</button>
+      <button type="button" data-action="click->upload-toggle#showUrl" data-upload-toggle-target="urlTab" class="px-2.5 py-1 text-xs font-medium rounded-md bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors cursor-pointer">URL</button>
+    </div>
+
+    <div data-upload-toggle-target="filePanel">
+      <%= form_with url: import_minutes_admin_meeting_path(@meeting), method: :post, multipart: true, class: "flex flex-col sm:flex-row sm:items-center gap-3" do %>
+        <input type="file" name="minutes_file" accept=".json,.pdf" class="text-sm text-gray-500 file:mr-2 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 file:cursor-pointer file:transition-colors max-w-full min-w-0" />
+        <button type="submit" class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors cursor-pointer">Import Minutes</button>
+      <% end %>
+    </div>
+
+    <div data-upload-toggle-target="urlPanel" class="hidden">
+      <%= form_with url: import_minutes_admin_meeting_path(@meeting), method: :post, class: "flex flex-col sm:flex-row sm:items-center gap-3" do %>
+        <input type="url" name="minutes_url" placeholder="https://cityofjerseycity.civicweb.net/Portal/MeetingInformation.aspx?Id=..." class="rounded-lg border-gray-300 shadow-sm text-sm focus:border-blue-500 focus:ring-blue-500 max-w-full min-w-0 flex-1" />
+        <button type="submit" class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors cursor-pointer">Import from URL</button>
+      <% end %>
+    </div>
+  </div>
 </div>
 
 <%# Stats %>

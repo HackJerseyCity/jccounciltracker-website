@@ -1,16 +1,38 @@
 <h1 class="text-2xl font-bold text-gray-900 mb-6">Upload Agenda</h1>
 
-<div class="max-w-lg bg-white rounded-lg border border-gray-200 p-6">
-  <%= form_with url: admin_meetings_path, multipart: true do |f| %>
-    <div class="mb-4">
-      <label class="block text-sm font-medium text-gray-700 mb-2">Agenda file</label>
-      <input type="file" name="agenda_file" accept=".json,.pdf" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 file:cursor-pointer" />
-      <p class="mt-1 text-xs text-gray-500">Upload a PDF agenda or a structured JSON file.</p>
-    </div>
+<div class="max-w-lg bg-white rounded-lg border border-gray-200 p-6" data-controller="upload-toggle">
+  <div class="flex gap-2 mb-6">
+    <button type="button" data-action="click->upload-toggle#showFile" data-upload-toggle-target="fileTab" class="px-3 py-1.5 text-sm font-medium rounded-lg bg-blue-600 text-white transition-colors cursor-pointer">Upload File</button>
+    <button type="button" data-action="click->upload-toggle#showUrl" data-upload-toggle-target="urlTab" class="px-3 py-1.5 text-sm font-medium rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors cursor-pointer">Import from URL</button>
+  </div>
 
-    <div class="flex items-center gap-3">
-      <%= f.submit "Upload", class: "inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors cursor-pointer" %>
-      <%= link_to "Cancel", admin_meetings_path, class: "text-sm text-gray-600 hover:text-gray-800" %>
-    </div>
-  <% end %>
+  <div data-upload-toggle-target="filePanel">
+    <%= form_with url: admin_meetings_path, multipart: true do |f| %>
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700 mb-2">Agenda file</label>
+        <input type="file" name="agenda_file" accept=".json,.pdf" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 file:cursor-pointer" />
+        <p class="mt-1 text-xs text-gray-500">Upload a PDF agenda or a structured JSON file.</p>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <%= f.submit "Upload", class: "inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors cursor-pointer" %>
+        <%= link_to "Cancel", admin_meetings_path, class: "text-sm text-gray-600 hover:text-gray-800" %>
+      </div>
+    <% end %>
+  </div>
+
+  <div data-upload-toggle-target="urlPanel" class="hidden">
+    <%= form_with url: admin_meetings_path, method: :post do |f| %>
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700 mb-2">CivicWeb meeting URL</label>
+        <input type="url" name="agenda_url" placeholder="https://cityofjerseycity.civicweb.net/Portal/MeetingInformation.aspx?Id=..." class="block w-full rounded-lg border-gray-300 shadow-sm text-sm focus:border-blue-500 focus:ring-blue-500" />
+        <p class="mt-1 text-xs text-gray-500">Paste the CivicWeb meeting URL to import the agenda directly.</p>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <%= f.submit "Import from URL", class: "inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors cursor-pointer" %>
+        <%= link_to "Cancel", admin_meetings_path, class: "text-sm text-gray-600 hover:text-gray-800" %>
+      </div>
+    <% end %>
+  </div>
 </div>
