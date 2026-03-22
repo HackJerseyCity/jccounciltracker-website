@@ -15,6 +15,15 @@
   </div>
 
   <div>
+    <%= form.label :campaign_type, "Email category", class: "block text-sm font-medium text-gray-700 mb-1" %>
+    <%= form.select :campaign_type,
+          EmailCampaign::CAMPAIGN_TYPES.map { |key, config| [config[:label], key] },
+          {},
+          class: "block w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500" %>
+    <p class="mt-1 text-xs text-gray-500">Only users subscribed to this category will receive the email.</p>
+  </div>
+
+  <div>
     <%= form.label :body, "Email body", class: "block text-sm font-medium text-gray-700 mb-1" %>
     <%= form.rich_text_area :body, class: "min-h-[20rem]" %>
   </div>

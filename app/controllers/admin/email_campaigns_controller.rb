@@ -80,7 +80,7 @@ module Admin
     end
 
     def campaign_params
-      params.expect(email_campaign: [ :title, :body ])
+      params.expect(email_campaign: [ :title, :body, :campaign_type ])
     end
   end
 end

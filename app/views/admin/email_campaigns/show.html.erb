@@ -11,7 +11,8 @@
       <% end %>
     </div>
     <p class="text-sm text-gray-500">
-      By <%= @campaign.user&.name || "Unknown" %> &middot;
+      <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-blue-50 text-blue-700"><%= @campaign.type_label %></span>
+      &middot; By <%= @campaign.user&.name || "Unknown" %> &middot;
       <% if @campaign.sent_at %>
         Sent <%= @campaign.sent_at.strftime("%b %-d, %Y at %l:%M %p") %>
       <% else %>

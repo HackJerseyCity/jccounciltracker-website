@@ -1,14 +1,62 @@
 <div class="max-w-md mx-auto px-4 py-16">
-  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">
-    <h1 class="text-xl font-bold text-gray-900 mb-2">Unsubscribe</h1>
-    <p class="text-sm text-gray-600 mb-6">
-      Unsubscribe <strong><%= @user.email_address %></strong> from CouncilTracker newsletter emails?
-    </p>
-    <%= form_with url: unsubscribe_path(token: params[:token]), method: :post, local: true do %>
-      <button type="submit" class="w-full rounded-lg bg-red-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-red-500 cursor-pointer">
-        Unsubscribe
-      </button>
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+    <div class="text-center mb-6">
+      <h1 class="text-xl font-bold text-gray-900">Email Preferences</h1>
+      <p class="mt-1 text-sm text-gray-500"><%= @user.email_address %></p>
+    </div>
+
+    <% if @saved %>
+      <div class="mb-6 py-2 px-3 rounded-lg text-sm font-medium <%= @unsubscribed_all ? 'bg-amber-50 text-amber-700' : 'bg-green-50 text-green-700' %>">
+        <% if @unsubscribed_all %>
+          You've been unsubscribed from all optional emails.
+        <% else %>
+          Your preferences have been saved.
+        <% end %>
+      </div>
     <% end %>
-    <p class="mt-4 text-xs text-gray-400">You can re-enable emails anytime from your profile settings.</p>
+
+    <%= form_with url: unsubscribe_path(token: params[:token]), method: :patch, local: true, class: "space-y-4" do |form| %>
+      <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Choose which emails you'd like to receive</p>
+
+      <% User::EMAIL_PREFERENCES.each do |pref, label| %>
+        <label class="flex items-start gap-3 py-3 px-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors cursor-pointer">
+          <input type="hidden" name="<%= pref %>" value="0">
+          <input type="checkbox" name="<%= pref %>" value="1"
+                 <%= "checked" if @user.send(pref) %>
+                 class="mt-0.5 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+          <div>
+            <span class="text-sm font-medium text-gray-900"><%= label %></span>
+            <% case pref %>
+            <% when :email_council_updates %>
+              <p class="text-xs text-gray-500 mt-0.5">Updates about Jersey City Council meetings, votes, and agendas</p>
+            <% when :email_blog %>
+              <p class="text-xs text-gray-500 mt-0.5">New blog posts and analysis from CouncilTracker</p>
+            <% when :email_marketing %>
+              <p class="text-xs text-gray-500 mt-0.5">Feature announcements and CouncilTracker news</p>
+            <% end %>
+          </div>
+        </label>
+      <% end %>
+
+      <div class="pt-2">
+        <button type="submit" class="w-full rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 cursor-pointer">
+          Save Preferences
+        </button>
+      </div>
+    <% end %>
+
+    <div class="mt-4 pt-4 border-t border-gray-200 text-center">
+      <%= button_to "Unsubscribe from all",
+            unsubscribe_all_path(token: params[:token]),
+            method: :post,
+            class: "text-xs text-gray-400 hover:text-red-600 transition-colors cursor-pointer",
+            data: { turbo_confirm: "Unsubscribe from all optional emails?" } %>
+    </div>
+
+    <div class="mt-4 text-center">
+      <p class="text-xs text-gray-400">
+        Account and security emails (like password resets) will always be sent regardless of these settings.
+      </p>
+    </div>
   </div>
 </div>

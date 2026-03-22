@@ -2,6 +2,7 @@ draft_campaign:
   title: "March Update"
   status: "draft"
   sent_count: 0
+  campaign_type: "council_updates"
   user: site_admin
 
 sent_campaign:
@@ -9,4 +10,5 @@ sent_campaign:
   status: "sent"
   sent_at: <%= 1.week.ago.to_fs(:db) %>
   sent_count: 2
+  campaign_type: "blog"
   user: site_admin

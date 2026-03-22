@@ -28,9 +28,9 @@
                   CouncilTracker is an independent civic transparency project.<br>
                   Not affiliated with the City of Jersey City.
                 </p>
-                <% if @unsubscribe_url.present? %>
+                <% if @preferences_url.present? %>
                   <p style="margin: 12px 0 0; font-size: 12px;">
-                    <a href="<%= @unsubscribe_url %>" style="color: #6b7280; text-decoration: underline;">Unsubscribe from these emails</a>
+                    <a href="<%= @preferences_url %>" style="color: #6b7280; text-decoration: underline;">Manage your communication preferences</a>
                   </p>
                 <% end %>
               </td>

@@ -21,4 +21,18 @@ class User < ApplicationRecord
   def admin?
     site_admin? || content_admin?
   end
+
+  EMAIL_PREFERENCES = {
+    email_council_updates: "Council Updates",
+    email_blog: "Blog Posts",
+    email_marketing: "Marketing & Announcements"
+  }.freeze
+
+  def subscribed_to?(preference)
+    respond_to?(preference) && send(preference)
+  end
+
+  def all_emails_unsubscribed?
+    EMAIL_PREFERENCES.keys.none? { |pref| send(pref) }
+  end
 end

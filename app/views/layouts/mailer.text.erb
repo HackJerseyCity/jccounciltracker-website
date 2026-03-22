@@ -1,1 +1,8 @@
 <%= yield %>
+
+--
+Jersey City Council Tracker
+An independent civic transparency project.
+<% if @preferences_url.present? %>
+Manage your email preferences: <%= @preferences_url %>
+<% end %>

@@ -2,7 +2,7 @@ class SendCampaignJob < ApplicationJob
   queue_as :default
 
   def perform(campaign)
-    users = User.where(email_notifications: true)
+    users = campaign.subscribed_users
 
     users.find_each do |user|
       campaign.email_deliveries.find_or_create_by!(user: user)

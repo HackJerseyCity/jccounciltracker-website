@@ -55,8 +55,9 @@ Rails.application.routes.draw do
 
   get "search", to: "search#index", as: :search
 
-  get "unsubscribe", to: "unsubscribes#show", as: :unsubscribe
-  post "unsubscribe", to: "unsubscribes#create"
+  get "email-preferences", to: "unsubscribes#show", as: :unsubscribe
+  patch "email-preferences", to: "unsubscribes#update"
+  post "email-preferences/unsubscribe-all", to: "unsubscribes#unsubscribe_all", as: :unsubscribe_all
 
   get "terms", to: "pages#terms", as: :terms
   get "privacy", to: "pages#privacy", as: :privacy

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_22_133840) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_22_180435) do
   create_table "action_text_rich_texts", force: :cascade do |t|
     t.text "body"
     t.datetime "created_at", null: false
@@ -137,6 +137,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_22_133840) do
   end
 
   create_table "email_campaigns", force: :cascade do |t|
+    t.string "campaign_type", default: "council_updates", null: false
     t.datetime "created_at", null: false
     t.datetime "sent_at"
     t.integer "sent_count", default: 0
@@ -222,7 +223,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_22_133840) do
   create_table "users", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "email_address", null: false
-    t.boolean "email_notifications", default: true, null: false
+    t.boolean "email_blog", default: true, null: false
+    t.boolean "email_council_updates", default: true, null: false
+    t.boolean "email_marketing", default: true, null: false
     t.string "name", null: false
     t.string "password_digest", null: false
     t.integer "role", default: 0, null: false
