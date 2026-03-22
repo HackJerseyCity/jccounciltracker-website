@@ -50,5 +50,8 @@ Rails.application.routes.draw do
 
   get "search", to: "search#index", as: :search
 
+  get "terms", to: "pages#terms", as: :terms
+  get "privacy", to: "pages#privacy", as: :privacy
+
   root "pages#home"
 end
