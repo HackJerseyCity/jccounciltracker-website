@@ -1,5 +1,7 @@
 module Admin
   class MeetingsController < BaseController
+    rate_limit to: 5, within: 1.minute, only: %i[create import_minutes auto_tag], with: -> { redirect_back fallback_location: admin_meetings_path, alert: "Too many requests. Please wait a moment." }
+
     def index
       @meetings = Meeting.includes(agenda_versions: { agenda_sections: :agenda_items }).chronological
     end
@@ -48,6 +50,7 @@ module Admin
       service = AgendaImportService.new(data).call
 
       if service.success?
+        audit("agenda.import", target: service.meeting, metadata: { version: service.agenda_version.version_number })
         notice = if service.new_version?
           "New version (v#{service.agenda_version.version_number}) added for this meeting."
         else
@@ -98,6 +101,7 @@ module Admin
       Rails.cache.delete(cache_key)
 
       if service.success?
+        audit("agenda.apply_changes", target: @meeting, metadata: { changes_applied: accepted.size })
         redirect_to admin_meeting_path(@meeting), notice: "#{accepted.size} change(s) applied successfully."
       else
         redirect_to admin_meeting_path(@meeting), alert: service.errors.join(", ")
@@ -129,6 +133,7 @@ module Admin
       service = MinutesImportService.new(data).call
 
       if service.success?
+        audit("minutes.import", target: @meeting)
         notice = "Minutes imported successfully."
         notice += " Warnings: #{service.warnings.join('; ')}" if service.warnings.any?
         redirect_to admin_meeting_path(@meeting), notice: notice
@@ -147,6 +152,7 @@ module Admin
         end
       end
 
+      audit("minutes.delete", target: @meeting)
       redirect_to admin_meeting_path(@meeting), notice: "Minutes data deleted."
     end
 
@@ -155,9 +161,11 @@ module Admin
       @agenda_version = @meeting.agenda_versions.find(params[:version_id])
       if @agenda_version.published?
         @agenda_version.unpublish!
+        audit("agenda.unpublish", target: @meeting, metadata: { version: @agenda_version.version_number })
         redirect_to admin_meeting_path(@meeting), notice: "Version #{@agenda_version.version_number} unpublished."
       else
         @agenda_version.publish!
+        audit("agenda.publish", target: @meeting, metadata: { version: @agenda_version.version_number })
         redirect_to admin_meeting_path(@meeting), notice: "Version #{@agenda_version.version_number} published."
       end
     end
@@ -170,12 +178,14 @@ module Admin
       AutoTaggingService.new(items).call
 
       tagged_count = items.count { |i| i.tags.reload.any? }
+      audit("meeting.auto_tag", target: @meeting, metadata: { tagged: tagged_count, total: items.size })
       redirect_to admin_meeting_path(@meeting),
         notice: "Auto-tagged #{tagged_count} of #{items.size} items."
     end
 
     def destroy
       @meeting = Meeting.find(params[:id])
+      audit("meeting.destroy", target: @meeting, metadata: { date: @meeting.date.to_s })
       @meeting.destroy!
       redirect_to admin_meetings_path, notice: "Meeting deleted."
     end

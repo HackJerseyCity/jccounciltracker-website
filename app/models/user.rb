@@ -3,6 +3,7 @@ class User < ApplicationRecord
   has_many :sessions, dependent: :destroy
   has_many :stars, dependent: :destroy
   has_many :blog_posts, dependent: :destroy
+  has_many :admin_audit_logs, dependent: :destroy
 
   def starred?(item)
     stars.exists?(starrable: item)

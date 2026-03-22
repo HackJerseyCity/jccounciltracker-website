@@ -1,5 +1,7 @@
 module Admin
   class AgendaItemsController < BaseController
+    rate_limit to: 3, within: 1.minute, only: :auto_tag_all, with: -> { redirect_to untagged_admin_agenda_items_path, alert: "Too many requests. Please wait a moment." }
+
     def untagged
       scope = AgendaItem.left_joins(:agenda_item_tags)
                 .where(agenda_item_tags: { id: nil })
@@ -39,6 +41,7 @@ module Admin
                          .count
       tagged_now = items.size - still_untagged
 
+      audit("agenda_items.auto_tag_all", metadata: { tagged: tagged_now, still_untagged: still_untagged })
       redirect_to untagged_admin_agenda_items_path,
         notice: "Auto-tagged #{tagged_now} items. #{still_untagged} still need manual tagging."
     end

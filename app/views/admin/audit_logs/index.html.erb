@@ -1,0 +1,55 @@
+<div class="flex items-center justify-between mb-6">
+  <h1 class="text-xl sm:text-2xl font-bold text-gray-900">Audit Log</h1>
+</div>
+
+<%# Filters %>
+<div class="flex flex-col sm:flex-row sm:items-center gap-3 mb-6">
+  <%= form_with url: admin_audit_logs_path, method: :get, local: true, class: "flex flex-wrap gap-2 items-center" do %>
+    <select name="action_filter" class="rounded-md border border-gray-300 px-3 py-1.5 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500">
+      <option value="">All actions</option>
+      <% @action_types.each do |action| %>
+        <option value="<%= action %>" <%= "selected" if params[:action_filter] == action %>><%= action.tr(".", " ").titleize %></option>
+      <% end %>
+    </select>
+
+    <select name="user_id" class="rounded-md border border-gray-300 px-3 py-1.5 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500">
+      <option value="">All admins</option>
+      <% @admin_users.each do |user| %>
+        <option value="<%= user.id %>" <%= "selected" if params[:user_id] == user.id.to_s %>><%= user.name %></option>
+      <% end %>
+    </select>
+
+    <button type="submit" class="px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-md hover:bg-blue-700 transition-colors cursor-pointer">Filter</button>
+    <% if params[:action_filter].present? || params[:user_id].present? %>
+      <%= link_to "Clear", admin_audit_logs_path, class: "px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors" %>
+    <% end %>
+  <% end %>
+</div>
+
+<% if @audit_logs.any? %>
+  <div class="bg-white rounded-lg border border-gray-200 divide-y divide-gray-100">
+    <% @audit_logs.each do |log| %>
+      <div class="px-4 sm:px-6 py-3 flex items-start sm:items-center justify-between gap-3">
+        <div class="min-w-0">
+          <div class="flex items-center gap-2 flex-wrap">
+            <span class="text-sm font-medium text-gray-900"><%= log.user&.name || "Unknown" %></span>
+            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700"><%= log.action %></span>
+            <% if log.target_type.present? %>
+              <span class="text-xs text-gray-500"><%= log.target_type %> #<%= log.target_id %></span>
+            <% end %>
+          </div>
+          <% if log.metadata.present? %>
+            <p class="text-xs text-gray-400 mt-0.5">
+              <%= log.metadata.map { |k, v| "#{k}: #{v}" }.join(", ") %>
+            </p>
+          <% end %>
+        </div>
+        <span class="shrink-0 text-xs text-gray-400 whitespace-nowrap"><%= log.created_at.strftime("%b %-d, %Y %l:%M %p") %></span>
+      </div>
+    <% end %>
+  </div>
+<% else %>
+  <div class="bg-white rounded-lg border border-gray-200 p-12 text-center">
+    <p class="text-gray-500">No audit log entries yet.</p>
+  </div>
+<% end %>

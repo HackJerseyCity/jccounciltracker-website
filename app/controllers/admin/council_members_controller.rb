@@ -13,6 +13,7 @@ module Admin
       @council_member = CouncilMember.new(council_member_params)
 
       if @council_member.save
+        audit("council_member.create", target: @council_member)
         redirect_to admin_council_members_path, notice: "Council member added."
       else
         render :new, status: :unprocessable_entity
@@ -27,6 +28,7 @@ module Admin
       @council_member = CouncilMember.find(params[:id])
 
       if @council_member.update(council_member_params)
+        audit("council_member.update", target: @council_member)
         redirect_to admin_council_members_path, notice: "Council member updated."
       else
         render :edit, status: :unprocessable_entity
@@ -35,6 +37,7 @@ module Admin
 
     def destroy
       @council_member = CouncilMember.find(params[:id])
+      audit("council_member.destroy", target: @council_member, metadata: { name: @council_member.display_name })
       @council_member.destroy!
       redirect_to admin_council_members_path, notice: "Council member deleted."
     end

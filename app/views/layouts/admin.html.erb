@@ -34,6 +34,7 @@
               <% if Current.session&.user&.site_admin? %>
                 <%= link_to "Invitations", admin_invitations_path, class: "hover:text-white transition-colors" %>
                 <%= link_to "Users", admin_users_path, class: "hover:text-white transition-colors" %>
+                <%= link_to "Audit Log", admin_audit_logs_path, class: "hover:text-white transition-colors" %>
               <% end %>
             </div>
           </div>
@@ -62,6 +63,7 @@
           <% if Current.session&.user&.site_admin? %>
             <%= link_to "Invitations", admin_invitations_path, class: "hover:text-white transition-colors py-1" %>
             <%= link_to "Users", admin_users_path, class: "hover:text-white transition-colors py-1" %>
+            <%= link_to "Audit Log", admin_audit_logs_path, class: "hover:text-white transition-colors py-1" %>
           <% end %>
           <div class="border-t border-gray-700 pt-2 mt-1 flex flex-col gap-2">
             <%= link_to "Profile", edit_profile_path, class: "hover:text-white transition-colors py-1" %>

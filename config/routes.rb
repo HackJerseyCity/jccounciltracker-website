@@ -9,6 +9,7 @@ Rails.application.routes.draw do
     get "/", to: "dashboard#show", as: :dashboard
     resources :invitations, only: [ :index, :new, :create, :destroy ]
     resources :users, only: [ :index ]
+    resources :audit_logs, only: [ :index ]
     resources :meetings, only: [ :index, :show, :new, :create, :destroy ] do
       post :import_minutes, on: :member
       delete :delete_minutes, on: :member

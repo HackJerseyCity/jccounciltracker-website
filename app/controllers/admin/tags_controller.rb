@@ -1,5 +1,7 @@
 module Admin
   class TagsController < BaseController
+    rate_limit to: 3, within: 1.minute, only: :seed_rules, with: -> { redirect_to admin_tags_path, alert: "Too many requests. Please wait a moment." }
+
     SORT_COLUMNS = {
       "name" => "LOWER(tags.name)",
       "items" => "COUNT(agenda_item_tags.id)"
@@ -40,12 +42,14 @@ module Admin
 
     def destroy
       @tag = Tag.find(params[:id])
+      audit("tag.destroy", target: @tag, metadata: { name: @tag.name })
       @tag.destroy
       redirect_to admin_tags_path(q: params[:q]), notice: "Tag \"#{@tag.name}\" deleted."
     end
 
     def seed_rules
       AutoTaggingService.seed_default_rules!
+      audit("tags.seed_rules")
       redirect_to admin_tags_path, notice: "Default auto-tag rules seeded."
     end
 

@@ -18,6 +18,7 @@ module Admin
       @blog_post.user = Current.user
 
       if @blog_post.save
+        audit("blog_post.create", target: @blog_post)
         redirect_to admin_blog_post_path(@blog_post), notice: "Blog post created."
       else
         render :new, status: :unprocessable_entity
@@ -36,6 +37,7 @@ module Admin
     end
 
     def destroy
+      audit("blog_post.destroy", target: @blog_post, metadata: { title: @blog_post.title })
       @blog_post.destroy!
       redirect_to admin_blog_posts_path, notice: "Blog post deleted."
     end
@@ -43,9 +45,11 @@ module Admin
     def publish
       if @blog_post.published?
         @blog_post.unpublish!
+        audit("blog_post.unpublish", target: @blog_post)
         redirect_to admin_blog_post_path(@blog_post), notice: "Blog post unpublished."
       else
         @blog_post.publish!
+        audit("blog_post.publish", target: @blog_post)
         redirect_to admin_blog_post_path(@blog_post), notice: "Blog post published."
       end
     end

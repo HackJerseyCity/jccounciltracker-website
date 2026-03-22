@@ -258,6 +258,30 @@
   </div>
 <% end %>
 
+<%# ===== AUDIT LOG ===== %>
+<% if @recent_audit_logs.any? %>
+  <div class="mb-8">
+    <div class="flex items-center justify-between mb-3">
+      <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wider">Recent Admin Activity</h2>
+      <%= link_to "View all", admin_audit_logs_path, class: "text-xs text-blue-600 hover:text-blue-800" %>
+    </div>
+    <div class="bg-white rounded-lg border border-gray-200 divide-y divide-gray-100">
+      <% @recent_audit_logs.each do |log| %>
+        <div class="px-4 py-2.5 flex items-center justify-between gap-3">
+          <div class="min-w-0 flex items-center gap-2">
+            <span class="text-xs font-medium text-gray-600"><%= log.user&.name || "Unknown" %></span>
+            <span class="text-xs text-gray-400"><%= log.action.tr(".", " ").titleize %></span>
+            <% if log.target_type.present? %>
+              <span class="text-[10px] text-gray-400 bg-gray-100 rounded px-1.5 py-0.5"><%= log.target_type %></span>
+            <% end %>
+          </div>
+          <span class="shrink-0 text-[10px] text-gray-400 whitespace-nowrap"><%= time_ago_in_words(log.created_at) %> ago</span>
+        </div>
+      <% end %>
+    </div>
+  </div>
+<% end %>
+
 <%# ===== TAG COVERAGE ===== %>
 <div class="mb-8">
   <div class="flex items-center justify-between mb-3">

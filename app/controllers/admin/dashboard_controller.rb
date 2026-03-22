@@ -69,6 +69,9 @@ module Admin
 
       # --- Blog ---
       @draft_posts = BlogPost.draft.chronological.limit(3)
+
+      # --- Audit log ---
+      @recent_audit_logs = AdminAuditLog.includes(:user).recent.limit(10)
     end
   end
 end

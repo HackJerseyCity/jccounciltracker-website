@@ -16,6 +16,7 @@ module Admin
       @invitation.invited_by = Current.session.user
 
       if @invitation.save
+        audit("invitation.create", target: @invitation, metadata: { role: @invitation.role })
         redirect_to admin_invitations_path, notice: "Invitation created."
       else
         render :new, status: :unprocessable_entity
@@ -24,6 +25,7 @@ module Admin
 
     def destroy
       @invitation = Invitation.find(params[:id])
+      audit("invitation.revoke", target: @invitation)
       @invitation.destroy
       redirect_to admin_invitations_path, notice: "Invitation revoked."
     end

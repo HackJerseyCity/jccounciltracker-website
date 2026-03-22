@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_22_123323) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_22_132211) do
   create_table "action_text_rich_texts", force: :cascade do |t|
     t.text "body"
     t.datetime "created_at", null: false
@@ -47,6 +47,20 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_22_123323) do
     t.bigint "blob_id", null: false
     t.string "variation_digest", null: false
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+  end
+
+  create_table "admin_audit_logs", force: :cascade do |t|
+    t.string "action", null: false
+    t.datetime "created_at", null: false
+    t.text "metadata"
+    t.integer "target_id"
+    t.string "target_type"
+    t.datetime "updated_at", null: false
+    t.integer "user_id", null: false
+    t.index ["action"], name: "index_admin_audit_logs_on_action"
+    t.index ["created_at"], name: "index_admin_audit_logs_on_created_at"
+    t.index ["target_type", "target_id"], name: "index_admin_audit_logs_on_target_type_and_target_id"
+    t.index ["user_id"], name: "index_admin_audit_logs_on_user_id"
   end
 
   create_table "agenda_item_tags", force: :cascade do |t|
@@ -205,6 +219,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_22_123323) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "admin_audit_logs", "users"
   add_foreign_key "agenda_item_tags", "agenda_items"
   add_foreign_key "agenda_item_tags", "tags"
   add_foreign_key "agenda_items", "agenda_sections"
