@@ -35,6 +35,10 @@ Rails.application.routes.draw do
     resources :blog_posts do
       post :publish, on: :member
     end
+    resources :email_campaigns do
+      post :send_campaign, on: :member
+      get :preview, on: :member
+    end
   end
 
   get "dashboard", to: "dashboard#show", as: :dashboard
@@ -50,6 +54,9 @@ Rails.application.routes.draw do
   get "up" => "rails/health#show", as: :rails_health_check
 
   get "search", to: "search#index", as: :search
+
+  get "unsubscribe", to: "unsubscribes#show", as: :unsubscribe
+  post "unsubscribe", to: "unsubscribes#create"
 
   get "terms", to: "pages#terms", as: :terms
   get "privacy", to: "pages#privacy", as: :privacy

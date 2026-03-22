@@ -14,6 +14,7 @@ class RegistrationsController < ApplicationController
 
     if @user.save
       @invitation.accept!(@user)
+      UserMailer.welcome(@user).deliver_later
       start_new_session_for @user
       redirect_to root_path, notice: "Welcome to CouncilTracker!"
     else

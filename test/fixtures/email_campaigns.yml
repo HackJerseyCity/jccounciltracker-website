@@ -1,0 +1,12 @@
+draft_campaign:
+  title: "March Update"
+  status: "draft"
+  sent_count: 0
+  user: site_admin
+
+sent_campaign:
+  title: "February Newsletter"
+  status: "sent"
+  sent_at: <%= 1.week.ago.to_fs(:db) %>
+  sent_count: 2
+  user: site_admin

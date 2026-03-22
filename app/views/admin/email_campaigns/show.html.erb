@@ -1,0 +1,72 @@
+<div class="flex items-center justify-between mb-6">
+  <div>
+    <div class="flex items-center gap-3 mb-1">
+      <h1 class="text-xl sm:text-2xl font-bold text-gray-900"><%= @campaign.title %></h1>
+      <% if @campaign.draft? %>
+        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-600">Draft</span>
+      <% elsif @campaign.sending? %>
+        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-50 text-amber-700">Sending</span>
+      <% else %>
+        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-emerald-50 text-emerald-700">Sent</span>
+      <% end %>
+    </div>
+    <p class="text-sm text-gray-500">
+      By <%= @campaign.user&.name || "Unknown" %> &middot;
+      <% if @campaign.sent_at %>
+        Sent <%= @campaign.sent_at.strftime("%b %-d, %Y at %l:%M %p") %>
+      <% else %>
+        Created <%= @campaign.created_at.strftime("%b %-d, %Y") %>
+      <% end %>
+    </p>
+  </div>
+
+  <div class="flex items-center gap-2">
+    <%= link_to "Preview", preview_admin_email_campaign_path(@campaign), class: "px-3.5 py-2 text-sm font-medium text-gray-700 bg-white rounded-lg hover:bg-gray-50 ring-1 ring-gray-300 transition-colors", target: "_blank" %>
+    <% if @campaign.draft? %>
+      <%= link_to "Edit", edit_admin_email_campaign_path(@campaign), class: "px-3.5 py-2 text-sm font-medium text-gray-700 bg-white rounded-lg hover:bg-gray-50 ring-1 ring-gray-300 transition-colors" %>
+      <%= button_to "Send to #{@campaign.recipient_count} recipients",
+            send_campaign_admin_email_campaign_path(@campaign),
+            method: :post,
+            class: "px-3.5 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors cursor-pointer",
+            data: { turbo_confirm: "Send this campaign to #{@campaign.recipient_count} subscribed users? This cannot be undone." } %>
+    <% end %>
+  </div>
+</div>
+
+<%# Delivery stats %>
+<% if @campaign.sent? || @campaign.sending? %>
+  <div class="grid grid-cols-3 gap-3 mb-6">
+    <div class="bg-white rounded-lg border border-gray-200 p-4 text-center">
+      <p class="text-2xl font-bold text-emerald-600"><%= @sent_count %></p>
+      <p class="text-xs text-gray-500">Sent</p>
+    </div>
+    <div class="bg-white rounded-lg border border-gray-200 p-4 text-center">
+      <p class="text-2xl font-bold text-amber-600"><%= @pending_count %></p>
+      <p class="text-xs text-gray-500">Pending</p>
+    </div>
+    <div class="bg-white rounded-lg border border-gray-200 p-4 text-center">
+      <p class="text-2xl font-bold text-red-600"><%= @failed_count %></p>
+      <p class="text-xs text-gray-500">Failed</p>
+    </div>
+  </div>
+<% end %>
+
+<%# Email body preview %>
+<div class="bg-white rounded-lg border border-gray-200 p-6 mb-6">
+  <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Content</h2>
+  <div class="prose prose-sm max-w-none">
+    <%= @campaign.body %>
+  </div>
+</div>
+
+<%# Actions %>
+<div class="flex items-center gap-3">
+  <%= link_to "Back to Newsletters", admin_email_campaigns_path, class: "text-sm text-blue-600 hover:text-blue-800" %>
+  <% if @campaign.draft? %>
+    <%= button_to "Delete",
+          admin_email_campaign_path(@campaign),
+          method: :delete,
+          class: "text-sm text-red-600 hover:text-red-800 cursor-pointer",
+          data: { turbo_confirm: "Delete this campaign draft?" } %>
+  <% end %>
+</div>

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_22_132211) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_22_133840) do
   create_table "action_text_rich_texts", force: :cascade do |t|
     t.text "body"
     t.datetime "created_at", null: false
@@ -136,6 +136,31 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_22_132211) do
     t.index ["last_name"], name: "index_council_members_on_last_name"
   end
 
+  create_table "email_campaigns", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.datetime "sent_at"
+    t.integer "sent_count", default: 0
+    t.string "status", default: "draft", null: false
+    t.string "title", null: false
+    t.datetime "updated_at", null: false
+    t.integer "user_id", null: false
+    t.index ["status"], name: "index_email_campaigns_on_status"
+    t.index ["user_id"], name: "index_email_campaigns_on_user_id"
+  end
+
+  create_table "email_deliveries", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.integer "email_campaign_id", null: false
+    t.datetime "sent_at"
+    t.string "status", default: "pending", null: false
+    t.datetime "updated_at", null: false
+    t.integer "user_id", null: false
+    t.index ["email_campaign_id", "user_id"], name: "index_email_deliveries_on_email_campaign_id_and_user_id", unique: true
+    t.index ["email_campaign_id"], name: "index_email_deliveries_on_email_campaign_id"
+    t.index ["status"], name: "index_email_deliveries_on_status"
+    t.index ["user_id"], name: "index_email_deliveries_on_user_id"
+  end
+
   create_table "invitations", force: :cascade do |t|
     t.datetime "accepted_at"
     t.integer "accepted_by_id"
@@ -197,6 +222,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_22_132211) do
   create_table "users", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "email_address", null: false
+    t.boolean "email_notifications", default: true, null: false
     t.string "name", null: false
     t.string "password_digest", null: false
     t.integer "role", default: 0, null: false
@@ -226,6 +252,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_22_132211) do
   add_foreign_key "agenda_sections", "agenda_versions"
   add_foreign_key "agenda_versions", "meetings"
   add_foreign_key "blog_posts", "users"
+  add_foreign_key "email_campaigns", "users"
+  add_foreign_key "email_deliveries", "email_campaigns"
+  add_foreign_key "email_deliveries", "users"
   add_foreign_key "invitations", "users", column: "accepted_by_id"
   add_foreign_key "invitations", "users", column: "invited_by_id"
   add_foreign_key "sessions", "users"

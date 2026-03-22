@@ -1,0 +1,37 @@
+<div class="flex items-center justify-between mb-6">
+  <h1 class="text-xl sm:text-2xl font-bold text-gray-900">Newsletters</h1>
+  <%= link_to "New Campaign", new_admin_email_campaign_path, class: "px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors" %>
+</div>
+
+<% if @campaigns.any? %>
+  <div class="bg-white rounded-lg border border-gray-200 divide-y divide-gray-100">
+    <% @campaigns.each do |campaign| %>
+      <div class="px-4 sm:px-6 py-4 flex items-center justify-between gap-3">
+        <div class="min-w-0">
+          <%= link_to campaign.title, admin_email_campaign_path(campaign), class: "text-sm font-medium text-gray-900 hover:text-blue-600 block truncate" %>
+          <div class="flex items-center gap-2 mt-1">
+            <% if campaign.draft? %>
+              <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-gray-100 text-gray-600">Draft</span>
+            <% elsif campaign.sending? %>
+              <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-amber-50 text-amber-700">Sending</span>
+            <% else %>
+              <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-emerald-50 text-emerald-700">Sent</span>
+            <% end %>
+            <% if campaign.sent? %>
+              <span class="text-xs text-gray-400"><%= campaign.sent_count %> recipients</span>
+            <% end %>
+            <span class="text-xs text-gray-400">by <%= campaign.user&.name || "Unknown" %></span>
+          </div>
+        </div>
+        <span class="shrink-0 text-xs text-gray-400 whitespace-nowrap">
+          <%= (campaign.sent_at || campaign.created_at).strftime("%b %-d, %Y") %>
+        </span>
+      </div>
+    <% end %>
+  </div>
+<% else %>
+  <div class="bg-white rounded-lg border border-gray-200 p-12 text-center">
+    <p class="text-gray-500">No campaigns yet.</p>
+    <p class="mt-2 text-sm text-gray-400">Create your first newsletter to get started.</p>
+  </div>
+<% end %>

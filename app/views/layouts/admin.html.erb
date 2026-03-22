@@ -31,6 +31,7 @@
               <%= link_to "Council", admin_council_members_path, class: "hover:text-white transition-colors" %>
               <%= link_to "Tags", admin_tags_path, class: "hover:text-white transition-colors" %>
               <%= link_to "Blog", admin_blog_posts_path, class: "hover:text-white transition-colors" %>
+              <%= link_to "Newsletters", admin_email_campaigns_path, class: "hover:text-white transition-colors" %>
               <% if Current.session&.user&.site_admin? %>
                 <%= link_to "Invitations", admin_invitations_path, class: "hover:text-white transition-colors" %>
                 <%= link_to "Users", admin_users_path, class: "hover:text-white transition-colors" %>
@@ -60,6 +61,7 @@
           <%= link_to "Council", admin_council_members_path, class: "hover:text-white transition-colors py-1" %>
           <%= link_to "Tags", admin_tags_path, class: "hover:text-white transition-colors py-1" %>
           <%= link_to "Blog", admin_blog_posts_path, class: "hover:text-white transition-colors py-1" %>
+          <%= link_to "Newsletters", admin_email_campaigns_path, class: "hover:text-white transition-colors py-1" %>
           <% if Current.session&.user&.site_admin? %>
             <%= link_to "Invitations", admin_invitations_path, class: "hover:text-white transition-colors py-1" %>
             <%= link_to "Users", admin_users_path, class: "hover:text-white transition-colors py-1" %>

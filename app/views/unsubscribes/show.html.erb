@@ -1,0 +1,14 @@
+<div class="max-w-md mx-auto px-4 py-16">
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">
+    <h1 class="text-xl font-bold text-gray-900 mb-2">Unsubscribe</h1>
+    <p class="text-sm text-gray-600 mb-6">
+      Unsubscribe <strong><%= @user.email_address %></strong> from CouncilTracker newsletter emails?
+    </p>
+    <%= form_with url: unsubscribe_path(token: params[:token]), method: :post, local: true do %>
+      <button type="submit" class="w-full rounded-lg bg-red-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-red-500 cursor-pointer">
+        Unsubscribe
+      </button>
+    <% end %>
+    <p class="mt-4 text-xs text-gray-400">You can re-enable emails anytime from your profile settings.</p>
+  </div>
+</div>

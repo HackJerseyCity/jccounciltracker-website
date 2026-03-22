@@ -11,6 +11,7 @@ class SignupsController < ApplicationController
     @user.role = :user
 
     if @user.save
+      UserMailer.welcome(@user).deliver_later
       start_new_session_for @user
       redirect_to root_path, notice: "Welcome to CouncilTracker!"
     else
