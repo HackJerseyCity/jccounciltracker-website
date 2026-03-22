@@ -32,6 +32,9 @@
           <%= button_to "Unpublish", publish_admin_meeting_path(@meeting, version_id: @agenda_version.id), method: :post, class: "px-3.5 py-2 text-sm font-medium text-amber-700 bg-amber-50 rounded-lg hover:bg-amber-100 ring-1 ring-amber-600/10 transition-colors cursor-pointer", data: { turbo_confirm: "Are you sure you want to unpublish this version? It will no longer be visible to the public." } %>
         <% end %>
       <% end %>
+      <% if @agenda_version %>
+        <%= button_to "Auto Tag", auto_tag_admin_meeting_path(@meeting), method: :post, class: "px-3.5 py-2 text-sm font-medium text-blue-700 bg-blue-50 rounded-lg hover:bg-blue-100 ring-1 ring-blue-600/10 transition-colors cursor-pointer", data: { turbo_confirm: "Auto-tag all items in this meeting based on keyword rules?" } %>
+      <% end %>
       <% if @meeting.minutes_imported? %>
         <%= button_to "Delete Minutes", delete_minutes_admin_meeting_path(@meeting), method: :delete, class: "px-3.5 py-2 text-sm font-medium text-amber-700 bg-amber-50 rounded-lg hover:bg-amber-100 ring-1 ring-amber-600/10 transition-colors cursor-pointer", data: { turbo_confirm: "Are you sure you want to delete minutes data? This will remove all vote records for this meeting." } %>
       <% end %>

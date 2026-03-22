@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_17_154621) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_22_123323) do
   create_table "action_text_rich_texts", force: :cascade do |t|
     t.text "body"
     t.datetime "created_at", null: false
@@ -164,6 +164,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_17_154621) do
     t.index ["user_id"], name: "index_stars_on_user_id"
   end
 
+  create_table "tag_rules", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "match_type", default: "keyword", null: false
+    t.string "pattern", null: false
+    t.integer "tag_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["tag_id"], name: "index_tag_rules_on_tag_id"
+  end
+
   create_table "tags", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "name", null: false
@@ -206,6 +215,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_17_154621) do
   add_foreign_key "invitations", "users", column: "invited_by_id"
   add_foreign_key "sessions", "users"
   add_foreign_key "stars", "users"
+  add_foreign_key "tag_rules", "tags"
   add_foreign_key "votes", "agenda_items"
   add_foreign_key "votes", "council_members"
 end

@@ -1,0 +1,12 @@
+<%= form_with model: rule, url: admin_tag_rules_path, class: "inline-flex items-center gap-1", data: { controller: "rule-form" } do |f| %>
+  <%= f.hidden_field :match_type, value: "keyword", data: { rule_form_target: "matchType" } %>
+  <input type="hidden" name="tag_id" value="<%= tag.id %>" />
+  <input type="text" name="tag_rule[pattern]" value="<%= rule.pattern %>" placeholder="+ add rule"
+         class="w-20 focus:w-32 transition-all px-1.5 py-0.5 text-xs rounded border border-dashed border-gray-300 focus:border-blue-400 focus:ring-0 placeholder-gray-400"
+         data-action="keydown->rule-form#keydown" data-rule-form-target="input" autocomplete="off" />
+  <button type="button" data-action="click->rule-form#toggleType" data-rule-form-target="typeButton"
+          class="text-[10px] text-gray-400 hover:text-gray-600 cursor-pointer" title="Toggle: K=keyword (exact word), P=phrase (starts with)">K</button>
+<% end %>
+<% if rule.errors.any? %>
+  <span class="text-xs text-red-600"><%= rule.errors.full_messages.first %></span>
+<% end %>

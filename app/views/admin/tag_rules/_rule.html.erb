@@ -1,0 +1,7 @@
+<span id="<%= dom_id(rule) %>" class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs bg-gray-100 text-gray-700 group">
+  <span class="<%= rule.phrase? ? "italic" : "" %>"><%= rule.pattern %></span>
+  <span class="text-gray-400 text-[10px]"><%= rule.match_type[0].upcase %></span>
+  <%= button_to admin_tag_rule_path(rule), method: :delete, class: "text-gray-400 hover:text-red-600 cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity", form: { class: "inline" } do %>
+    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+  <% end %>
+</span>

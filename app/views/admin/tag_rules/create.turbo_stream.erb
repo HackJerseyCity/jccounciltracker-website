@@ -1,0 +1,8 @@
+<%= turbo_stream.append "tag_rules_#{@tag.id}" do %>
+  <%= render partial: "admin/tag_rules/rule", locals: { rule: @rule } %>
+<% end %>
+<%= turbo_stream.replace "new_rule_form_#{@tag.id}" do %>
+  <div id="new_rule_form_<%= @tag.id %>">
+    <%= render partial: "admin/tag_rules/form", locals: { tag: @tag, rule: @tag.tag_rules.build } %>
+  </div>
+<% end %>

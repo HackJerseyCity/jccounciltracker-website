@@ -18,6 +18,16 @@
       <span class="text-gray-600"><%= tag.items_count %> <%= "item".pluralize(tag.items_count) %></span>
     <% end %>
   </td>
+  <td class="px-4 py-3 sm:px-6 text-sm">
+    <div id="tag_rules_<%= tag.id %>" class="flex flex-wrap gap-1.5">
+      <% tag.tag_rules.each do |rule| %>
+        <%= render partial: "admin/tag_rules/rule", locals: { rule: rule } %>
+      <% end %>
+      <div id="new_rule_form_<%= tag.id %>">
+        <%= render partial: "admin/tag_rules/form", locals: { tag: tag, rule: tag.tag_rules.build } %>
+      </div>
+    </div>
+  </td>
   <td class="px-4 py-3 sm:px-6 text-right text-sm space-x-2">
     <button type="button" class="text-blue-600 hover:text-blue-800 font-medium cursor-pointer" data-action="inline-edit#edit">Edit</button>
     <%= button_to "Delete", admin_tag_path(tag),

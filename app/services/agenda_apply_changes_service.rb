@@ -6,6 +6,7 @@ class AgendaApplyChangesService
     @new_data = new_data
     @accepted_changes = accepted_changes # array of item_numbers to accept
     @errors = []
+    @changed_items = []
   end
 
   def call
@@ -18,6 +19,8 @@ class AgendaApplyChangesService
     ActiveRecord::Base.transaction do
       apply_accepted_changes(version)
       raise ActiveRecord::Rollback if @errors.any?
+
+      AutoTaggingService.new(@changed_items).call if @changed_items.any?
     end
 
     self
@@ -56,6 +59,7 @@ class AgendaApplyChangesService
       url: new_data[:url],
       item_type: new_data[:item_type]
     )
+    @changed_items << old_item
   rescue ActiveRecord::RecordInvalid => e
     @errors << "Failed to update #{old_item.item_number}: #{e.message}"
   end
@@ -76,7 +80,9 @@ class AgendaApplyChangesService
       position: position
     )
 
-    unless item.save
+    if item.save
+      @changed_items << item
+    else
       @errors << "Failed to add #{new_data[:item_number]}: #{item.errors.full_messages.join(', ')}"
     end
   end

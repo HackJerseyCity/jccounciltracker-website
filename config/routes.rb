@@ -16,11 +16,14 @@ Rails.application.routes.draw do
       get :preview_agenda, on: :member
       post :apply_agenda, on: :member
       get :reupload_agenda, on: :member
+      post :auto_tag, on: :member
     end
     resources :council_members
     resources :tags, only: [ :index, :update, :destroy ] do
       get :search, on: :collection
+      post :seed_rules, on: :collection
     end
+    resources :tag_rules, only: [ :create, :destroy ]
     resources :agenda_items, only: [ :update, :destroy ]
     resources :agenda_item_tags, only: [ :create, :destroy ] do
       post :copy, on: :collection

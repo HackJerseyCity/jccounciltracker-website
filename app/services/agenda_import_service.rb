@@ -27,6 +27,8 @@ class AgendaImportService
 
       build_sections_and_items
       raise ActiveRecord::Rollback if @errors.any?
+
+      auto_tag_new_items
     end
 
     if @errors.any?
@@ -45,6 +47,10 @@ class AgendaImportService
   end
 
   private
+
+  def auto_tag_new_items
+    AutoTaggingService.new(@agenda_version.agenda_items.reload.to_a).call
+  end
 
   def validate_structure!
     unless @data.is_a?(Hash) && @data["meeting"].is_a?(Hash) && @data["sections"].is_a?(Array)

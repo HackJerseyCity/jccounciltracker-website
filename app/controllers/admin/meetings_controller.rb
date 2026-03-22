@@ -162,6 +162,18 @@ module Admin
       end
     end
 
+    def auto_tag
+      @meeting = Meeting.find(params[:id])
+      version = @meeting.current_version
+      items = version&.agenda_items&.to_a || []
+
+      AutoTaggingService.new(items).call
+
+      tagged_count = items.count { |i| i.tags.reload.any? }
+      redirect_to admin_meeting_path(@meeting),
+        notice: "Auto-tagged #{tagged_count} of #{items.size} items."
+    end
+
     def destroy
       @meeting = Meeting.find(params[:id])
       @meeting.destroy!

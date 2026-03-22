@@ -2,6 +2,7 @@ class Tag < ApplicationRecord
   include Starrable
   has_many :agenda_item_tags, dependent: :destroy
   has_many :agenda_items, through: :agenda_item_tags
+  has_many :tag_rules, dependent: :destroy
 
   validates :name, presence: true, uniqueness: { case_sensitive: false }
 

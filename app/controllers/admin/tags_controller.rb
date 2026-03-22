@@ -7,6 +7,7 @@ module Admin
 
     def index
       @tags = Tag.left_joins(:agenda_item_tags)
+                  .includes(:tag_rules)
                   .select("tags.*, COUNT(agenda_item_tags.id) AS items_count")
                   .group("tags.id")
 
@@ -41,6 +42,11 @@ module Admin
       @tag = Tag.find(params[:id])
       @tag.destroy
       redirect_to admin_tags_path(q: params[:q]), notice: "Tag \"#{@tag.name}\" deleted."
+    end
+
+    def seed_rules
+      AutoTaggingService.seed_default_rules!
+      redirect_to admin_tags_path, notice: "Default auto-tag rules seeded."
     end
 
     def search

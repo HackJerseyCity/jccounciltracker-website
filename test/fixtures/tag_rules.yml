@@ -1,0 +1,44 @@
+budget_keyword:
+  tag: budget
+  pattern: "budget"
+  match_type: "keyword"
+
+budget_appropriation:
+  tag: budget
+  pattern: "appropriation"
+  match_type: "phrase"
+
+infrastructure_dept:
+  tag: infrastructure
+  pattern: "department of infrastructure"
+  match_type: "phrase"
+
+housing_affordable:
+  tag: housing
+  pattern: "affordable housing"
+  match_type: "phrase"
+
+parking_keyword:
+  tag: parking
+  pattern: "parking"
+  match_type: "keyword"
+
+environmental_chromate:
+  tag: environmental
+  pattern: "chromate"
+  match_type: "keyword"
+
+environmental_soil:
+  tag: environmental
+  pattern: "soil remed"
+  match_type: "phrase"
+
+cannabis_keyword:
+  tag: cannabis
+  pattern: "cannabis"
+  match_type: "keyword"
+
+grants_cdbg:
+  tag: grants
+  pattern: "community development block grant"
+  match_type: "phrase"

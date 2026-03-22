@@ -6,3 +6,15 @@ infrastructure:
 
 housing:
   name: Housing
+
+parking:
+  name: parking
+
+environmental:
+  name: environmental
+
+cannabis:
+  name: cannabis
+
+grants:
+  name: grants
