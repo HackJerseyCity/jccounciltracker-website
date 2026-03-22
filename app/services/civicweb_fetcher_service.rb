@@ -1,11 +1,18 @@
 require "net/http"
 require "uri"
 require "nokogiri"
+require "json"
 
 class CivicwebFetcherService
   attr_reader :errors
 
   BASE_HOST = "cityofjerseycity.civicweb.net"
+
+  # DocumentType constants from CivicWeb packageDocumentTypes
+  AGENDA_HTML  = 1  # publishedAgendaOpenHtml
+  AGENDA_PDF   = 4  # publishedAgendaOpenPdf
+  MINUTES_HTML = 9  # publishedMinutesOpenHtml
+  MINUTES_PDF  = 10 # publishedMinutesOpenPdf
 
   def initialize(url)
     @url = url
@@ -13,17 +20,21 @@ class CivicwebFetcherService
   end
 
   def fetch_agenda_html
-    doc = fetch_meeting_page
-    return nil unless doc
-
-    pdf_doc_id = extract_pdf_document_id(doc)
-    unless pdf_doc_id
-      @errors << "Could not find agenda PDF link on the meeting page."
+    doc_id = find_document_id(AGENDA_HTML)
+    unless doc_id
+      @errors << "Agenda HTML document not found for this meeting."
       return nil
     end
+    fetch_document_html(doc_id)
+  end
 
-    html_doc_id = pdf_doc_id + 1
-    fetch_document_html(html_doc_id)
+  def fetch_minutes_html
+    doc_id = find_document_id(MINUTES_HTML)
+    unless doc_id
+      @errors << "Minutes HTML document not found. Minutes may not be published yet for this meeting."
+      return nil
+    end
+    fetch_document_html(doc_id)
   end
 
   def fetch_meeting_info
@@ -42,6 +53,38 @@ class CivicwebFetcherService
   end
 
   private
+
+  def find_document_id(document_type)
+    meeting_id = extract_meeting_id
+    unless meeting_id
+      @errors << "Could not extract meeting ID from URL."
+      return nil
+    end
+
+    documents = fetch_meeting_documents(meeting_id)
+    return nil unless documents
+
+    doc = documents.find { |d| d["DocumentType"] == document_type }
+    doc&.dig("Id")
+  end
+
+  def fetch_meeting_documents(meeting_id)
+    uri = URI.parse("https://#{BASE_HOST}/Services/MeetingsService.svc/meetings/#{meeting_id}/meetingDocuments")
+    response = http_get(uri)
+
+    unless response.is_a?(Net::HTTPSuccess)
+      @errors << "Failed to fetch meeting documents API: HTTP #{response.code}"
+      return nil
+    end
+
+    JSON.parse(response.body)
+  rescue JSON::ParserError
+    @errors << "Invalid response from meeting documents API."
+    nil
+  rescue StandardError => e
+    @errors << "Failed to fetch meeting documents: #{e.message}"
+    nil
+  end
 
   def fetch_meeting_page
     uri = URI.parse(@url)
@@ -63,17 +106,6 @@ class CivicwebFetcherService
   rescue StandardError => e
     @errors << "Failed to fetch meeting page: #{e.message}"
     nil
-  end
-
-  def extract_pdf_document_id(doc)
-    link = doc.at_css("#ctl00_MainContent_DocumentPrintVersion")
-    return nil unless link
-
-    href = link["href"]
-    return nil unless href
-
-    match = href.match(%r{/document/(\d+)/})
-    match ? match[1].to_i : nil
   end
 
   def extract_meeting_id
@@ -119,7 +151,7 @@ class CivicwebFetcherService
 
     content_type = response["content-type"] || ""
     unless content_type.include?("text/html")
-      @errors << "Document #{doc_id} is not HTML (#{content_type}). The HTML version may not be available."
+      @errors << "Document #{doc_id} is not HTML (#{content_type})."
       return nil
     end
 
@@ -139,6 +171,7 @@ class CivicwebFetcherService
 
     request = Net::HTTP::Get.new(uri)
     request["User-Agent"] = "CouncilTracker/1.0"
+    request["Accept"] = "application/json"
 
     response = http.request(request)
 

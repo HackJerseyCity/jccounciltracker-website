@@ -1,5 +1,4 @@
 require "nokogiri"
-require "net/http"
 
 class MinutesUrlParserService
   attr_reader :errors
@@ -18,8 +17,9 @@ class MinutesUrlParserService
       return nil
     end
 
-    html = fetch_minutes_html(fetcher)
+    html = fetcher.fetch_minutes_html
     unless html
+      @errors.concat(fetcher.errors)
       return nil
     end
 
@@ -35,110 +35,15 @@ class MinutesUrlParserService
 
   private
 
-  def fetch_minutes_html(fetcher)
-    # Minutes HTML is typically at PDF document ID + 1, but we need
-    # to find the minutes PDF first. The meeting page only shows the
-    # agenda PDF link. For now, try agenda PDF ID + 3 (common offset
-    # for minutes HTML: agenda PDF, agenda HTML, minutes PDF, minutes HTML).
-    # If that fails, report that minutes are not available via URL.
-    html = fetcher.fetch_agenda_html
-    unless html
-      @errors.concat(fetcher.errors)
-      return nil
-    end
-
-    # Parse the agenda HTML to check the title confirms it's an agenda
-    doc = Nokogiri::HTML(html)
-    title = doc.at_css("title")&.text || ""
-
-    unless title.downcase.include?("agenda")
-      @errors << "Could not locate agenda document to derive minutes URL."
-      return nil
-    end
-
-    # Derive minutes document IDs from the agenda PDF ID
-    # Agenda PDF = N, Agenda HTML = N+1
-    # Minutes PDF and HTML are at different offsets - we need to search
-    fetcher_page = CivicwebFetcherService.new(@url)
-    page_doc = Nokogiri::HTML(fetch_raw_page)
-    pdf_link = page_doc.at_css("#ctl00_MainContent_DocumentPrintVersion")
-
-    unless pdf_link
-      @errors << "Could not find document links on the meeting page."
-      return nil
-    end
-
-    pdf_match = pdf_link["href"]&.match(%r{/document/(\d+)/})
-    unless pdf_match
-      @errors << "Could not extract document ID from meeting page."
-      return nil
-    end
-
-    base_id = pdf_match[1].to_i
-
-    # Search for minutes HTML document in a reasonable range
-    # The minutes are typically generated after the agenda documents
-    (base_id + 2..base_id + 10).each do |doc_id|
-      candidate_html = fetch_document(doc_id)
-      next unless candidate_html
-
-      candidate_doc = Nokogiri::HTML(candidate_html)
-      candidate_title = candidate_doc.at_css("title")&.text || ""
-
-      if candidate_title.downcase.include?("minutes")
-        return candidate_html
-      end
-    end
-
-    @errors << "Minutes HTML document not found. Minutes may not be published yet for this meeting."
-    nil
-  end
-
-  def fetch_raw_page
-    uri = URI.parse(@url)
-    http = Net::HTTP.new(uri.host, uri.port)
-    http.use_ssl = true
-    http.open_timeout = 10
-    http.read_timeout = 30
-
-    request = Net::HTTP::Get.new(uri)
-    request["User-Agent"] = "CouncilTracker/1.0"
-    response = http.request(request)
-    response.body
-  end
-
-  def fetch_document(doc_id)
-    uri = URI.parse("https://#{CivicwebFetcherService::BASE_HOST}/document/#{doc_id}")
-    http = Net::HTTP.new(uri.host, uri.port)
-    http.use_ssl = true
-    http.open_timeout = 10
-    http.read_timeout = 30
-
-    request = Net::HTTP::Get.new(uri)
-    request["User-Agent"] = "CouncilTracker/1.0"
-    response = http.request(request)
-
-    return nil unless response.is_a?(Net::HTTPSuccess)
-    return nil unless (response["content-type"] || "").include?("text/html")
-
-    # Check it's not a 404 page or login redirect
-    body = response.body
-    return nil if body.include?("404") && body.include?("Object moved")
-
-    body
-  rescue StandardError
-    nil
-  end
-
   def parse_html(html, meeting_info)
     doc = Nokogiri::HTML(html)
-    text_lines = extract_text_lines(doc)
+    lines = extract_lines_from_paragraphs(doc)
 
-    meeting_date = parse_meeting_date(text_lines, meeting_info)
+    meeting_date = parse_meeting_date(lines, meeting_info)
     meeting_type = meeting_info[:meeting_type] || "regular"
 
-    council_members = extract_roster(text_lines)
-    items = parse_items(text_lines)
+    council_members = extract_roster(lines)
+    items = parse_items(lines)
 
     {
       "meeting" => {
@@ -150,13 +55,11 @@ class MinutesUrlParserService
     }
   end
 
-  def extract_text_lines(doc)
-    body = doc.at_css("body")
-    return [] unless body
-
-    text = body.inner_text
-    lines = text.split("\n").map { |l| l.gsub(/[[:space:]]+/, " ").strip }.reject(&:empty?)
-    lines.reject { |l| l == "\u00a0" }
+  def extract_lines_from_paragraphs(doc)
+    doc.css("p").filter_map do |p|
+      text = p.text.gsub(/[[:space:]]+/, " ").strip
+      text unless text.empty? || text == "\u00a0"
+    end
   end
 
   def parse_meeting_date(lines, meeting_info)
@@ -185,10 +88,15 @@ class MinutesUrlParserService
 
   def extract_roster(lines)
     members = []
-    lines.each do |line|
-      if line.match?(/council\s*(?:person|woman|man|member|president)/i)
-        name_match = line.match(/^(.+?),?\s+council/i)
-        members << name_match[1].strip if name_match
+    # Roster appears in the header area (first ~25 lines)
+    lines.first(25).each do |line|
+      # Match "Name, Councilperson" patterns (with ward/at-large suffixes)
+      name_match = line.match(/^(.+?),?\s+Councilperson/i)
+      if name_match
+        name = name_match[1].strip
+        # Extract last name for matching (handle "Jr.", suffixes)
+        last_name = name.split(/\s+/).reject { |p| p.match?(/^(jr|sr|ii|iii|iv)\.?,?$/i) }.last&.delete(",")
+        members << last_name if last_name
       end
     end
     members.uniq
