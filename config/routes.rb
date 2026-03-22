@@ -24,7 +24,10 @@ Rails.application.routes.draw do
       post :seed_rules, on: :collection
     end
     resources :tag_rules, only: [ :create, :destroy ]
-    resources :agenda_items, only: [ :update, :destroy ]
+    resources :agenda_items, only: [ :update, :destroy ] do
+      get :untagged, on: :collection
+      post :auto_tag_all, on: :collection
+    end
     resources :agenda_item_tags, only: [ :create, :destroy ] do
       post :copy, on: :collection
     end

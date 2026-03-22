@@ -1,0 +1,119 @@
+<%# Header %>
+<div class="mb-6">
+  <div class="flex items-center gap-2 text-sm text-gray-500 mb-3">
+    <%= link_to "Dashboard", admin_dashboard_path, class: "hover:text-blue-600" %>
+    <span>/</span>
+    <span class="text-gray-900">Untagged Items</span>
+  </div>
+
+  <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+    <div>
+      <h1 class="text-xl sm:text-2xl font-bold text-gray-900">Untagged Items</h1>
+      <p class="mt-1 text-sm text-gray-500">
+        <span class="font-semibold text-gray-700"><%= @untagged_count %></span> of <%= @total_count %> items need tags.
+        Add tags inline or run auto-tag to apply keyword rules.
+      </p>
+    </div>
+    <div class="flex items-center gap-2">
+      <%= button_to "Auto Tag All",
+            auto_tag_all_admin_agenda_items_path,
+            method: :post,
+            class: "px-4 py-2 text-sm font-medium text-blue-700 bg-blue-50 rounded-lg hover:bg-blue-100 ring-1 ring-blue-600/10 transition-colors cursor-pointer",
+            data: { turbo_confirm: "Run auto-tag rules on all #{@untagged_count} untagged items?" } %>
+    </div>
+  </div>
+</div>
+
+<%# Filters %>
+<div class="flex flex-wrap gap-2 mb-6">
+  <%= link_to "All",
+        untagged_admin_agenda_items_path(meeting_id: params[:meeting_id]),
+        class: "px-3 py-1.5 text-xs font-medium rounded-md transition-colors #{params[:type].blank? ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}" %>
+  <% AgendaItem.item_types.each_key do |type| %>
+    <%= link_to type.titleize,
+          untagged_admin_agenda_items_path(type: type, meeting_id: params[:meeting_id]),
+          class: "px-3 py-1.5 text-xs font-medium rounded-md transition-colors #{params[:type] == type ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}" %>
+  <% end %>
+
+  <% if @meetings_for_filter.any? %>
+    <span class="text-gray-300 mx-1">|</span>
+    <form action="<%= untagged_admin_agenda_items_path %>" method="get" class="inline-flex items-center gap-1">
+      <% if params[:type].present? %>
+        <input type="hidden" name="type" value="<%= params[:type] %>" />
+      <% end %>
+      <select name="meeting_id" onchange="this.form.submit()"
+              class="text-xs rounded-md border border-gray-300 py-1.5 pl-2 pr-7 text-gray-700 focus:border-blue-500 focus:ring-blue-500">
+        <option value="">All meetings</option>
+        <% @meetings_for_filter.each do |m| %>
+          <option value="<%= m.id %>" <%= "selected" if params[:meeting_id].to_s == m.id.to_s %>><%= m.display_name %></option>
+        <% end %>
+      </select>
+    </form>
+  <% end %>
+</div>
+
+<%# Progress bar %>
+<div class="mb-6">
+  <div class="flex items-center justify-between text-xs text-gray-500 mb-1">
+    <span>Tag coverage</span>
+    <span><%= ((@total_count - @untagged_count) * 100.0 / [@total_count, 1].max).round %>%</span>
+  </div>
+  <div class="w-full bg-gray-200 rounded-full h-2">
+    <div class="bg-emerald-500 h-2 rounded-full transition-all" style="width: <%= ((@total_count - @untagged_count) * 100.0 / [@total_count, 1].max).round %>%"></div>
+  </div>
+</div>
+
+<%# Items grouped by meeting %>
+<% grouped = @items.group_by { |item| item.agenda_section.agenda_version.meeting } %>
+<% if grouped.any? %>
+  <div class="space-y-6">
+    <% grouped.each do |meeting, items| %>
+      <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+        <div class="px-4 sm:px-6 py-3 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
+          <div>
+            <%= link_to meeting.display_name, admin_meeting_path(meeting), class: "font-semibold text-gray-900 hover:text-blue-600" %>
+            <span class="text-xs text-gray-500 ml-2"><%= items.size %> untagged</span>
+          </div>
+          <%= button_to "Auto Tag",
+                auto_tag_admin_meeting_path(meeting),
+                method: :post,
+                class: "px-2.5 py-1 text-xs font-medium text-blue-700 bg-blue-50 rounded-md hover:bg-blue-100 ring-1 ring-blue-600/10 transition-colors cursor-pointer",
+                data: { turbo_confirm: "Auto-tag items in #{meeting.display_name}?" } %>
+        </div>
+
+        <div class="divide-y divide-gray-100">
+          <% items.each do |item| %>
+            <div id="untagged_item_<%= item.id %>" class="px-4 sm:px-6 py-3">
+              <div class="flex items-start gap-3">
+                <div class="shrink-0 flex flex-col items-center gap-1">
+                  <span class="text-xs font-medium text-gray-500 bg-gray-100 rounded px-1.5 py-0.5"><%= item.item_number %></span>
+                  <span class="text-[10px] text-gray-400"><%= item.item_type.titleize %></span>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm text-gray-800 leading-snug"><%= item.title.truncate(200) %></p>
+                  <div class="flex flex-wrap items-center gap-2 mt-1.5 text-xs text-gray-400">
+                    <% if item.file_number.present? %>
+                      <span class="bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded"><%= item.file_number %></span>
+                    <% end %>
+                    <% if item.result.present? %>
+                      <span class="bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded"><%= item.result.titleize %></span>
+                    <% end %>
+                    <span><%= item.agenda_section.title %></span>
+                  </div>
+                  <div class="mt-2">
+                    <%= render "admin/agenda_item_tags/tags", agenda_item: item %>
+                  </div>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+<% else %>
+  <div class="bg-white rounded-lg border border-gray-200 px-6 py-12 text-center">
+    <p class="text-gray-500">All items are tagged!</p>
+    <%= link_to "Back to dashboard", admin_dashboard_path, class: "mt-2 text-sm text-blue-600 hover:text-blue-800 inline-block" %>
+  </div>
+<% end %>

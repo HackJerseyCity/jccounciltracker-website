@@ -45,7 +45,7 @@
       <% end %>
 
       <% if @untagged_count > 0 %>
-        <div class="bg-violet-50 rounded-lg border border-violet-200 p-4">
+        <%= link_to untagged_admin_agenda_items_path, class: "block bg-violet-50 rounded-lg border border-violet-200 p-4 hover:bg-violet-100 transition-colors" do %>
           <div class="flex items-center gap-2 mb-2">
             <span class="w-2 h-2 rounded-full bg-violet-400"></span>
             <span class="text-sm font-semibold text-violet-800">Untagged Items</span>
@@ -58,7 +58,7 @@
             <div class="bg-violet-500 h-1.5 rounded-full" style="width: <%= @total_items > 0 ? (@tagged_count * 100.0 / @total_items).round : 0 %>%"></div>
           </div>
           <p class="text-xs text-violet-500 mt-1"><%= (@tagged_count * 100.0 / [@total_items, 1].max).round %>% tagged</p>
-        </div>
+        <% end %>
       <% end %>
 
       <% if @draft_posts.any? %>
