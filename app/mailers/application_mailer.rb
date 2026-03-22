@@ -1,5 +1,5 @@
 class ApplicationMailer < ActionMailer::Base
-  default from: "CouncilTracker <notifications@jccounciltracker.com>"
+  default from: "Jersey City Council Tracker <notifications@jccounciltracker.com>"
   layout "mailer"
 
   private
