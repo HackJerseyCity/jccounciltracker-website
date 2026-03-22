@@ -63,14 +63,14 @@ class AgendaUrlParserService
 
   def parse_html(html, meeting_info)
     doc = Nokogiri::HTML(html)
-    lines = extract_lines_from_paragraphs(doc)
+    lines, line_links = extract_lines_and_links_from_paragraphs(doc)
     links = extract_links(doc)
     section_headers = extract_section_headers(doc)
 
     meeting_date = parse_meeting_date(lines, meeting_info)
     meeting_type = meeting_info[:meeting_type] || "regular"
 
-    sections = parse_sections(lines, links, section_headers)
+    sections = parse_sections(lines, links, line_links, section_headers)
 
     {
       "meeting" => {
@@ -82,11 +82,23 @@ class AgendaUrlParserService
     }
   end
 
-  def extract_lines_from_paragraphs(doc)
-    doc.css("p").filter_map do |p|
+  def extract_lines_and_links_from_paragraphs(doc)
+    lines = []
+    line_links = {} # line_index => url
+
+    doc.css("p").each do |p|
       text = p.text.gsub(/[[:space:]]+/, " ").strip
-      text unless text.empty? || text == "\u00a0"
+      next if text.empty? || text == "\u00a0"
+
+      a = p.at_css("a[href*='document']")
+      if a && a["href"]
+        line_links[lines.length] = make_absolute_url(a["href"])
+      end
+
+      lines << text
     end
+
+    [ lines, line_links ]
   end
 
   def extract_section_headers(doc)
@@ -127,6 +139,10 @@ class AgendaUrlParserService
     links
   end
 
+  # Note: Links without file numbers (e.g. "Ord. - Pdf") are handled via
+  # line_links from extract_lines_and_links_from_paragraphs, which maps
+  # line indices to URLs extracted from <a> tags within <p> elements.
+
   def make_absolute_url(href)
     if href.start_with?("/")
       "https://#{CivicwebFetcherService::BASE_HOST}#{href}"
@@ -159,7 +175,7 @@ class AgendaUrlParserService
     nil
   end
 
-  def parse_sections(lines, links, section_headers)
+  def parse_sections(lines, links, line_links, section_headers)
     sections = []
     current_section = nil
     current_item = nil
@@ -224,6 +240,14 @@ class AgendaUrlParserService
         file_number = file_match[1]
         current_item["file_number"] = file_number
         current_item["url"] = links[file_number]
+        i += 1
+        next
+      end
+
+      # Detect file reference without number: "Ord. - Pdf" or "Res. - Withdrawn - Pdf"
+      no_number_match = line.match(/^(?:Ord|Res)\.\s*-\s*(?:Withdrawn\s*-\s*)?Pdf$/i)
+      if no_number_match && current_item
+        current_item["url"] = line_links[i] if line_links[i]
         i += 1
         next
       end
