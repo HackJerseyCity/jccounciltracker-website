@@ -3,8 +3,30 @@ class StarsController < ApplicationController
 
   STARRABLE_TYPES = %w[Meeting AgendaItem CouncilMember Tag].freeze
 
+  TYPE_LABELS = {
+    "Meeting" => "Meetings",
+    "AgendaItem" => "Agenda Items",
+    "CouncilMember" => "Council Members",
+    "Tag" => "Topics"
+  }.freeze
+
   def index
-    @stars_by_type = Current.user.stars.includes(:starrable).group_by(&:starrable_type)
+    stars = Current.user.stars.includes(:starrable).order(created_at: :desc)
+
+    if params[:type].present? && STARRABLE_TYPES.include?(params[:type])
+      @active_type = params[:type]
+      stars = stars.where(starrable_type: @active_type)
+    end
+
+    @stars = stars.select { |s| s.starrable.present? }
+
+    if params[:q].present?
+      query = params[:q].downcase
+      @stars = @stars.select { |s| star_matches_query?(s, query) }
+    end
+
+    @type_counts = Current.user.stars.group(:starrable_type).count
+    @total_count = @type_counts.values.sum
   end
 
   def create
@@ -41,5 +63,22 @@ class StarsController < ApplicationController
 
   def dom_id_for_star_button(starrable)
     "star_button_#{starrable.class.name.underscore}_#{starrable.id}"
+  end
+
+  def star_matches_query?(star, query)
+    item = star.starrable
+    case star.starrable_type
+    when "Meeting"
+      item.display_name.downcase.include?(query)
+    when "AgendaItem"
+      item.title.downcase.include?(query) || item.item_number.downcase.include?(query) ||
+        item.file_number.to_s.downcase.include?(query)
+    when "CouncilMember"
+      item.display_name.downcase.include?(query)
+    when "Tag"
+      item.name.downcase.include?(query)
+    else
+      false
+    end
   end
 end

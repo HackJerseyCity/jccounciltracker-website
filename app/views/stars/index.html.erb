@@ -1,44 +1,104 @@
 <section class="p-6 sm:p-8">
-  <h1 class="text-3xl font-bold text-gray-900 mb-8">Starred Items</h1>
+  <h1 class="text-3xl font-bold text-gray-900 mb-6">Starred Items</h1>
 
-  <% if @stars_by_type.empty? %>
+  <% if @total_count > 0 %>
+    <%# Filters %>
+    <div class="flex flex-col sm:flex-row sm:items-center gap-3 mb-6">
+      <%# Type pills %>
+      <div class="flex flex-wrap gap-2">
+        <%= link_to stars_path(q: params[:q]),
+              class: "px-3 py-1.5 text-xs font-medium rounded-md transition-colors #{@active_type.blank? ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}" do %>
+          All <span class="ml-1 opacity-70"><%= @total_count %></span>
+        <% end %>
+        <% StarsController::TYPE_LABELS.each do |type, label| %>
+          <% count = @type_counts[type] || 0 %>
+          <% next if count == 0 %>
+          <%= link_to stars_path(type: type, q: params[:q]),
+                class: "px-3 py-1.5 text-xs font-medium rounded-md transition-colors #{@active_type == type ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}" do %>
+            <%= label %> <span class="ml-1 opacity-70"><%= count %></span>
+          <% end %>
+        <% end %>
+      </div>
+
+      <%# Search %>
+      <div class="sm:ml-auto">
+        <%= form_with url: stars_path, method: :get, local: true, class: "flex gap-2" do %>
+          <% if @active_type.present? %>
+            <input type="hidden" name="type" value="<%= @active_type %>" />
+          <% end %>
+          <input type="text" name="q" value="<%= params[:q] %>" placeholder="Search starred items..."
+                 class="rounded-md border border-gray-300 px-3 py-1.5 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500 w-48 sm:w-56"
+                 autocomplete="off" />
+          <button type="submit" class="px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-md hover:bg-blue-700 transition-colors cursor-pointer">Search</button>
+          <% if params[:q].present? %>
+            <%= link_to "Clear", stars_path(type: params[:type]), class: "px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors flex items-center" %>
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
+  <% if @total_count == 0 %>
     <div class="bg-white rounded-lg border border-gray-200 p-12 text-center">
       <p class="text-gray-500">You haven't starred any items yet. Star meetings, agenda items, council members, or topics for quick access.</p>
     </div>
+  <% elsif @stars.empty? %>
+    <div class="bg-white rounded-lg border border-gray-200 p-12 text-center">
+      <p class="text-gray-500">No starred items match your filters.</p>
+      <%= link_to "Clear filters", stars_path, class: "mt-2 text-sm text-blue-600 hover:text-blue-800 inline-block" %>
+    </div>
   <% else %>
+    <%# Group by type for display %>
+    <% grouped = @stars.group_by(&:starrable_type) %>
     <div class="space-y-8">
-      <% { "Meeting" => "Meetings", "AgendaItem" => "Agenda Items", "CouncilMember" => "Council Members", "Tag" => "Topics" }.each do |type, label| %>
-        <% if @stars_by_type[type]&.any? %>
-          <div>
-            <h2 class="text-xl font-semibold text-gray-900 mb-4"><%= label %></h2>
-            <div class="bg-white rounded-lg border border-gray-200 divide-y divide-gray-100">
-              <% @stars_by_type[type].each do |star| %>
-                <% item = star.starrable %>
-                <% next unless item %>
-                <div class="px-6 py-4 flex items-center justify-between">
-                  <div>
-                    <% case type %>
-                    <% when "Meeting" %>
-                      <%= link_to item.display_name, meeting_path(item), class: "text-blue-600 hover:text-blue-800 font-medium" %>
-                    <% when "AgendaItem" %>
-                      <span class="text-sm text-gray-400"><%= item.item_number %></span>
-                      <span class="text-sm text-gray-900"><%= item.title.truncate(100) %></span>
-                    <% when "CouncilMember" %>
-                      <%= link_to item.display_name, council_member_path(item), class: "text-blue-600 hover:text-blue-800 font-medium" %>
-                    <% when "Tag" %>
-                      <%= link_to item.name, tag_path(item), class: "text-blue-600 hover:text-blue-800 font-medium" %>
+      <% StarsController::TYPE_LABELS.each do |type, label| %>
+        <% next unless grouped[type]&.any? %>
+        <div>
+          <h2 class="text-lg font-semibold text-gray-900 mb-3"><%= label %></h2>
+          <div class="bg-white rounded-lg border border-gray-200 divide-y divide-gray-100">
+            <% grouped[type].each do |star| %>
+              <% item = star.starrable %>
+              <div class="px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
+                <div class="min-w-0">
+                  <% case type %>
+                  <% when "Meeting" %>
+                    <%= link_to item.display_name, meeting_path(item), class: "text-sm text-blue-600 hover:text-blue-800 font-medium" %>
+                  <% when "AgendaItem" %>
+                    <div class="flex items-start gap-2">
+                      <span class="shrink-0 text-xs font-medium text-gray-500 bg-gray-100 rounded px-1.5 py-0.5"><%= item.item_number %></span>
+                      <div class="min-w-0">
+                        <p class="text-sm text-gray-900 truncate"><%= item.title.truncate(120) %></p>
+                        <div class="flex items-center gap-2 mt-0.5 text-xs text-gray-400">
+                          <% if item.file_number.present? %>
+                            <span><%= item.file_number %></span>
+                          <% end %>
+                          <span><%= item.item_type.titleize %></span>
+                          <% if item.meeting.present? %>
+                            <span><%= item.meeting.date.strftime("%b %-d, %Y") %></span>
+                          <% end %>
+                        </div>
+                      </div>
+                    </div>
+                  <% when "CouncilMember" %>
+                    <%= link_to item.display_name, council_member_path(item), class: "text-sm text-blue-600 hover:text-blue-800 font-medium" %>
+                  <% when "Tag" %>
+                    <%= link_to tag_path(item), class: "inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-800 hover:bg-indigo-200 transition-colors" do %>
+                      <%= item.name %>
                     <% end %>
-                  </div>
+                  <% end %>
+                </div>
+                <div class="shrink-0 flex items-center gap-2">
+                  <span class="text-[10px] text-gray-400 hidden sm:inline"><%= time_ago_in_words(star.created_at) %> ago</span>
                   <%= button_to star_path(star), method: :delete, class: "text-yellow-500 hover:text-yellow-600 cursor-pointer", data: { turbo_stream: true } do %>
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
                       <path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.006 5.404.434c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.434 2.082-5.005Z" clip-rule="evenodd" />
                     </svg>
                   <% end %>
                 </div>
-              <% end %>
-            </div>
+              </div>
+            <% end %>
           </div>
-        <% end %>
+        </div>
       <% end %>
     </div>
   <% end %>
